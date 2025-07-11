@@ -3,7 +3,7 @@ import { ErrorHandler } from './errorHandler';
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: 'https://moneymind-g1po.onrender.com/api',
   withCredentials: true, // Important for session cookies
   timeout: 10000, // 10 second timeout
   headers: {

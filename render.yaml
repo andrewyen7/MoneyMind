@@ -13,3 +13,12 @@ services:
         generateValue: true
       - key: PORT
         value: 10000
+
+  - type: web
+    name: moneymind-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://moneymind-g1po.onrender.com/api
