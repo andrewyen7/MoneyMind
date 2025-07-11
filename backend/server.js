@@ -18,6 +18,9 @@ require('./config/passport')(passport);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy for Render
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(cors({
   origin: [
@@ -25,7 +28,9 @@ app.use(cors({
     'http://localhost:5174',
     'https://moneymind-1.onrender.com'
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
