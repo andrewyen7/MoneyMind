@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: moneymind-backend
+    env: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_ATLAS_URI
+        value: mongodb+srv://andrewyen8:YenYiHua%4069@clusterandrew.29nd2.mongodb.net/?retryWrites=true&w=majority&appName=ClusterAndrew
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PORT
+        value: 10000
