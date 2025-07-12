@@ -11,6 +11,7 @@ const authRoutes = require('./routes/auth');
 const categoryRoutes = require('./routes/categories');
 const transactionRoutes = require('./routes/transactions');
 const budgetRoutes = require('./routes/budgets');
+const dashboardRoutes = require('./routes/dashboard');
 
 // Passport configuration
 require('./config/passport')(passport);
@@ -67,6 +68,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/budgets', budgetRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Connect to database and seed
 connectDB().then(() => {

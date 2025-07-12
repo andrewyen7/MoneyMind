@@ -208,13 +208,27 @@ router.post('/', ensureAuthenticated, async (req, res) => {
     }
     
     // Create transaction
+    // Fix date handling by parsing date parts directly to avoid timezone issues
+    let transactionDate;
+    if (date) {
+      const dateParts = date.split('-');
+      if (dateParts.length === 3) {
+        // Create date with year, month (0-indexed), day
+        transactionDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+      } else {
+        transactionDate = new Date(date);
+      }
+    } else {
+      transactionDate = new Date();
+    }
+    
     const newTransaction = new Transaction({
       userId: req.user._id,
       type,
       amount: parseFloat(amount),
       description: description.trim(),
       category,
-      date: new Date(date),
+      date: transactionDate,
       notes: notes ? notes.trim() : undefined,
       tags: tags ? tags.map(tag => tag.trim()).filter(tag => tag.length > 0) : [],
       isRecurring: isRecurring || false,
@@ -225,6 +239,10 @@ router.post('/', ensureAuthenticated, async (req, res) => {
     
     // Populate category for response
     await newTransaction.populate('category', 'name icon color type');
+    
+    // Update dashboard data timestamp for this user
+    const { userLastUpdates } = require('../utils/updateTracker');
+    userLastUpdates[req.user._id.toString()] = Date.now();
     
     res.status(201).json({
       success: true,
@@ -306,7 +324,18 @@ router.put('/:id', ensureAuthenticated, async (req, res) => {
     if (amount !== undefined) transaction.amount = parseFloat(amount);
     if (description) transaction.description = description.trim();
     if (category) transaction.category = category;
-    if (date) transaction.date = new Date(date);
+    
+    // Fix date handling by parsing date parts directly to avoid timezone issues
+    if (date) {
+      const dateParts = date.split('-');
+      if (dateParts.length === 3) {
+        // Create date with year, month (0-indexed), day
+        transaction.date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+      } else {
+        transaction.date = new Date(date);
+      }
+    }
+    
     if (notes !== undefined) transaction.notes = notes ? notes.trim() : undefined;
     if (tags !== undefined) {
       transaction.tags = tags ? tags.map(tag => tag.trim()).filter(tag => tag.length > 0) : [];
@@ -318,6 +347,10 @@ router.put('/:id', ensureAuthenticated, async (req, res) => {
 
     // Populate category for response
     await transaction.populate('category', 'name icon color type');
+
+    // Update dashboard data timestamp for this user
+    const { userLastUpdates } = require('../utils/updateTracker');
+    userLastUpdates[req.user._id.toString()] = Date.now();
 
     res.json({
       success: true,
@@ -370,6 +403,10 @@ router.delete('/:id', ensureAuthenticated, async (req, res) => {
     // Soft delete
     await transaction.softDelete();
     console.log('Transaction deleted successfully');
+
+    // Update dashboard data timestamp for this user
+    const { userLastUpdates } = require('../utils/updateTracker');
+    userLastUpdates[req.user._id.toString()] = Date.now();
 
     res.json({
       success: true,

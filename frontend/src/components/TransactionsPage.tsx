@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useDashboardRefresh } from '../contexts/DashboardContext';
+import dashboardService from '../services/dashboardService';
 import Navigation from './shared/Navigation';
 import Header from './shared/Header';
 import TransactionForm from './TransactionForm';
@@ -10,7 +10,6 @@ import transactionService, { Transaction, TransactionFormData, TransactionStats,
 
 const TransactionsPage: React.FC = () => {
   const { state } = useAuth();
-  const { triggerRefresh } = useDashboardRefresh();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [stats, setStats] = useState<TransactionStats | null>(null);
   const [pagination, setPagination] = useState({
@@ -69,7 +68,7 @@ const TransactionsPage: React.FC = () => {
       await transactionService.createTransaction(data);
       setShowForm(false);
       await loadData(); // Reload data
-      localStorage.setItem('dashboardRefresh', 'true'); // Trigger dashboard refresh
+      await dashboardService.notifyUpdate(); // Notify dashboard of update
     } catch (error: any) {
       throw error; // Let the form handle the error
     } finally {
@@ -85,7 +84,7 @@ const TransactionsPage: React.FC = () => {
       await transactionService.updateTransaction(editingTransaction._id, data);
       setEditingTransaction(null);
       await loadData(); // Reload data
-      localStorage.setItem('dashboardRefresh', 'true'); // Trigger dashboard refresh
+      await dashboardService.notifyUpdate(); // Notify dashboard of update
     } catch (error: any) {
       throw error; // Let the form handle the error
     } finally {
@@ -106,7 +105,7 @@ const TransactionsPage: React.FC = () => {
     try {
       await transactionService.deleteTransaction(id);
       await loadData(); // Reload data
-      localStorage.setItem('dashboardRefresh', 'true'); // Trigger dashboard refresh
+      await dashboardService.notifyUpdate(); // Notify dashboard of update
     } catch (error: any) {
       setError(error.message);
     }
