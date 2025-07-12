@@ -40,13 +40,7 @@ router.get('/', ensureAuthenticated, async (req, res) => {
       sortOrder
     });
     
-    // Fix date display by formatting as YYYY-MM-DD
-    const formattedTransactions = transactions.map(t => {
-      const transaction = t.toObject();
-      const date = new Date(transaction.date);
-      transaction.date = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-      return transaction;
-    });
+    const formattedTransactions = transactions;
 
     // Get total count for pagination
     const query = { userId: req.user._id, isActive: true };
