@@ -52,6 +52,13 @@ const EnhancedDashboard: React.FC = () => {
 
   useEffect(() => {
     loadDashboardData();
+    
+    // Auto-refresh every 3 seconds
+    const interval = setInterval(() => {
+      loadDashboardData();
+    }, 3000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   // Prepare data for spending pie chart
@@ -102,10 +109,14 @@ const EnhancedDashboard: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric'
-    });
+    // Extract date parts directly from string to avoid timezone conversion
+    const dateStr = dateString.split('T')[0]; // Get YYYY-MM-DD part
+    const [year, month, day] = dateStr.split('-');
+    
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    return `${monthNames[parseInt(month) - 1]} ${parseInt(day)}`;
   };
 
 
