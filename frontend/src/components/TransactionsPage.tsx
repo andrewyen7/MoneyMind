@@ -7,7 +7,6 @@ import TransactionFilters from './TransactionFilters';
 import transactionService, { Transaction, TransactionFormData, TransactionStats, TransactionFilters as TFilters } from '../services/transactionService';
 
 const TransactionsPage: React.FC = () => {
-  // const { state } = useAuth(); // Removed unused variable
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [stats, setStats] = useState<TransactionStats | null>(null);
   const [pagination, setPagination] = useState({
