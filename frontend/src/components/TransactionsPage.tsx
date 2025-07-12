@@ -242,7 +242,7 @@ const TransactionsPage: React.FC = () => {
                   amount: editingTransaction.amount,
                   description: editingTransaction.description,
                   category: editingTransaction.category._id,
-                  date: editingTransaction.date.split('T')[0],
+                  date: new Date(editingTransaction.date).toISOString().split('T')[0],
                   notes: editingTransaction.notes,
                   tags: editingTransaction.tags
                 } : undefined}
