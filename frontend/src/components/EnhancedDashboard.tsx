@@ -111,37 +111,48 @@ const EnhancedDashboard: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    // Parse date string and create date in local timezone
-    const dateParts = dateString.split('T')[0].split('-');
-    const year = parseInt(dateParts[0]);
-    const month = parseInt(dateParts[1]) - 1; // Month is 0-indexed
-    const day = parseInt(dateParts[2]);
-    const date = new Date(year, month, day);
+    // Extract just the date part and parse manually to avoid timezone issues
+    const dateOnly = dateString.substring(0, 10); // Get YYYY-MM-DD
+    const [year, month, day] = dateOnly.split('-').map(Number);
     
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric'
-    });
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    return `${monthNames[month - 1]} ${day}`;
   };
 
-  // Auto-refresh when component becomes visible (user returns from other pages)
+  // Auto-refresh when component becomes visible or when transactions change
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
+    const handleStorageChange = () => {
+      const shouldRefresh = localStorage.getItem('dashboardRefresh');
+      if (shouldRefresh) {
+        localStorage.removeItem('dashboardRefresh');
         loadDashboardData();
       }
     };
 
-    const handleFocus = () => {
-      loadDashboardData();
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        handleStorageChange();
+      }
     };
+
+    const handleFocus = () => {
+      handleStorageChange();
+    };
+
+    // Check for refresh flag every 500ms
+    const interval = setInterval(handleStorageChange, 500);
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
+    window.addEventListener('storage', handleStorageChange);
     
     return () => {
+      clearInterval(interval);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
 

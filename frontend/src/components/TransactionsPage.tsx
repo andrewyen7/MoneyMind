@@ -69,7 +69,7 @@ const TransactionsPage: React.FC = () => {
       await transactionService.createTransaction(data);
       setShowForm(false);
       await loadData(); // Reload data
-      triggerRefresh(); // Refresh dashboard
+      localStorage.setItem('dashboardRefresh', 'true'); // Trigger dashboard refresh
     } catch (error: any) {
       throw error; // Let the form handle the error
     } finally {
@@ -85,7 +85,7 @@ const TransactionsPage: React.FC = () => {
       await transactionService.updateTransaction(editingTransaction._id, data);
       setEditingTransaction(null);
       await loadData(); // Reload data
-      triggerRefresh(); // Refresh dashboard
+      localStorage.setItem('dashboardRefresh', 'true'); // Trigger dashboard refresh
     } catch (error: any) {
       throw error; // Let the form handle the error
     } finally {
@@ -106,7 +106,7 @@ const TransactionsPage: React.FC = () => {
     try {
       await transactionService.deleteTransaction(id);
       await loadData(); // Reload data
-      triggerRefresh(); // Refresh dashboard
+      localStorage.setItem('dashboardRefresh', 'true'); // Trigger dashboard refresh
     } catch (error: any) {
       setError(error.message);
     }
