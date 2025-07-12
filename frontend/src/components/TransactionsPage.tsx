@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import Navigation from './shared/Navigation';
 import Header from './shared/Header';
 import TransactionForm from './TransactionForm';
