@@ -15,13 +15,21 @@ router.get('/data', ensureAuthenticated, async (req, res) => {
     const userId = req.user._id.toString();
     
     // Get recent transactions
-    const transactions = await Transaction.find({ 
+    const transactionsRaw = await Transaction.find({ 
       userId: req.user._id,
       isActive: true 
     })
     .populate('category', 'name icon color type')
     .sort({ date: -1 })
     .limit(5);
+    
+    // Fix date display by formatting as YYYY-MM-DD
+    const transactions = transactionsRaw.map(t => {
+      const transaction = t.toObject();
+      const date = new Date(transaction.date);
+      transaction.date = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      return transaction;
+    });
     
     // Get transaction stats
     const stats = await Transaction.getTransactionStats(req.user._id);
