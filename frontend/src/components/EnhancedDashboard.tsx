@@ -119,14 +119,13 @@ const EnhancedDashboard: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    // Extract just the date part and parse manually to avoid timezone issues
-    const dateOnly = dateString.substring(0, 10); // Get YYYY-MM-DD
-    const [year, month, day] = dateOnly.split('-').map(Number);
+    // Parse date as UTC to avoid timezone issues
+    const date = new Date(dateString + 'T12:00:00.000Z');
     
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     
-    return `${monthNames[month - 1]} ${day}`;
+    return `${monthNames[date.getUTCMonth()]} ${date.getUTCDate()}`;
   };
 
   // Auto-refresh when component becomes visible or when transactions change
