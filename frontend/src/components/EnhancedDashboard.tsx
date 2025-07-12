@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import dashboardService from '../services/dashboardService';
 import Navigation from './shared/Navigation';
 import LoadingSpinner, { StatCardSkeleton, ChartSkeleton } from './shared/LoadingSpinner';
 import { ErrorDisplay } from './shared/ErrorBoundary';
@@ -18,7 +17,6 @@ const EnhancedDashboard: React.FC = () => {
   const [budgetSummary, setBudgetSummary] = useState<BudgetSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [lastUpdate, setLastUpdate] = useState<number>(0);
   const showError = useErrorToast();
 
   // Load all dashboard data
@@ -27,18 +25,21 @@ const EnhancedDashboard: React.FC = () => {
       setIsLoading(true);
       setError(null);
       
-      // Get dashboard data from the new API endpoint
-      const dashboardData = await dashboardService.getDashboardData();
+      const [
+        transactionsData,
+        statsData,
+        budgetsData,
+        budgetSummaryData
+      ] = await Promise.all([
+        transactionService.getTransactions({ limit: 5, sortBy: 'date', sortOrder: 'desc' }),
+        transactionService.getTransactionStats(),
+        budgetService.getBudgets({ period: 'monthly' }),
+        budgetService.getBudgetSummary('monthly')
+      ]);
       
-      setTransactions(dashboardData.transactions);
-      setStats(dashboardData.stats);
-      setBudgets(dashboardData.budgets);
-      
-      // Store the last update timestamp
-      setLastUpdate(dashboardData.lastUpdate);
-      
-      // Also get budget summary
-      const budgetSummaryData = await budgetService.getBudgetSummary('monthly');
+      setTransactions(transactionsData.transactions);
+      setStats(statsData);
+      setBudgets(budgetsData);
       setBudgetSummary(budgetSummaryData);
     } catch (error: any) {
       const errorMessage = error.message || 'Failed to load dashboard data';
@@ -51,25 +52,7 @@ const EnhancedDashboard: React.FC = () => {
 
   useEffect(() => {
     loadDashboardData();
-    
-    // Set up polling to check for updates every 2 seconds
-    const checkForUpdates = async () => {
-      if (lastUpdate > 0) {
-        try {
-          const result = await dashboardService.checkUpdates(lastUpdate);
-          if (result.hasUpdates) {
-            loadDashboardData();
-          }
-        } catch (error) {
-          console.error('Failed to check for updates:', error);
-        }
-      }
-    };
-    
-    const interval = setInterval(checkForUpdates, 2000);
-    
-    return () => clearInterval(interval);
-  }, [lastUpdate]);
+  }, []);
 
   // Prepare data for spending pie chart
   const getSpendingByCategory = () => {
@@ -125,40 +108,7 @@ const EnhancedDashboard: React.FC = () => {
     });
   };
 
-  // Auto-refresh when component becomes visible or when transactions change
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const shouldRefresh = localStorage.getItem('dashboardRefresh');
-      if (shouldRefresh) {
-        localStorage.removeItem('dashboardRefresh');
-        loadDashboardData();
-      }
-    };
 
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        handleStorageChange();
-      }
-    };
-
-    const handleFocus = () => {
-      handleStorageChange();
-    };
-
-    // Check for refresh flag every 500ms
-    const interval = setInterval(handleStorageChange, 500);
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
-    window.addEventListener('storage', handleStorageChange);
-    
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
 
   if (isLoading) {
     return (
