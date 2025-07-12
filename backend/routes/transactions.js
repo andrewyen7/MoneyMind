@@ -348,6 +348,9 @@ router.put('/:id', ensureAuthenticated, async (req, res) => {
 // @access  Private
 router.delete('/:id', ensureAuthenticated, async (req, res) => {
   try {
+    console.log('Delete request for transaction ID:', req.params.id);
+    console.log('User ID:', req.user._id);
+    
     // Find transaction
     const transaction = await Transaction.findOne({
       _id: req.params.id,
@@ -356,14 +359,17 @@ router.delete('/:id', ensureAuthenticated, async (req, res) => {
     });
 
     if (!transaction) {
+      console.log('Transaction not found for deletion');
       return res.status(404).json({
         success: false,
         message: 'Transaction not found'
       });
     }
 
+    console.log('Transaction found, performing soft delete');
     // Soft delete
     await transaction.softDelete();
+    console.log('Transaction deleted successfully');
 
     res.json({
       success: true,
