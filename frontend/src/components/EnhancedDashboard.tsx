@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useDashboardRefresh } from '../contexts/DashboardContext';
 import Navigation from './shared/Navigation';
 import LoadingSpinner, { StatCardSkeleton, ChartSkeleton } from './shared/LoadingSpinner';
 import { ErrorDisplay } from './shared/ErrorBoundary';
@@ -11,6 +12,7 @@ import transactionService, { Transaction, TransactionStats } from '../services/t
 import budgetService, { Budget, BudgetSummary } from '../services/budgetService';
 
 const EnhancedDashboard: React.FC = () => {
+  const { refreshTrigger } = useDashboardRefresh();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [stats, setStats] = useState<TransactionStats | null>(null);
   const [budgets, setBudgets] = useState<Budget[]>([]);
@@ -53,6 +55,13 @@ const EnhancedDashboard: React.FC = () => {
   useEffect(() => {
     loadDashboardData();
   }, []);
+
+  // Refresh when trigger changes (from other components)
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      loadDashboardData();
+    }
+  }, [refreshTrigger]);
 
   // Prepare data for spending pie chart
   const getSpendingByCategory = () => {
@@ -102,8 +111,13 @@ const EnhancedDashboard: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    // Create date in local timezone to avoid timezone offset issues
-    const date = new Date(dateString + 'T00:00:00');
+    // Parse date string and create date in local timezone
+    const dateParts = dateString.split('T')[0].split('-');
+    const year = parseInt(dateParts[0]);
+    const month = parseInt(dateParts[1]) - 1; // Month is 0-indexed
+    const day = parseInt(dateParts[2]);
+    const date = new Date(year, month, day);
+    
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric'

@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { DashboardProvider } from './contexts/DashboardContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
@@ -18,7 +19,8 @@ function App() {
     <ErrorBoundary>
       <ToastProvider>
         <AuthProvider>
-          <Router>
+          <DashboardProvider>
+            <Router>
             <div className="App">
               <Routes>
                 {/* Public routes */}
@@ -74,7 +76,8 @@ function App() {
                 <Route path="*" element={<Navigate to="/login" replace />} />
               </Routes>
             </div>
-          </Router>
+            </Router>
+          </DashboardProvider>
         </AuthProvider>
       </ToastProvider>
     </ErrorBoundary>
