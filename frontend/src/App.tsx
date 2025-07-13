@@ -20,7 +20,7 @@ function App() {
       <ToastProvider>
         <AuthProvider>
           <DashboardProvider>
-            <Router>
+            <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <div className="App">
               <Routes>
                 {/* Public routes */}
