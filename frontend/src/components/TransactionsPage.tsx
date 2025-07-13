@@ -248,21 +248,38 @@ const TransactionsPage: React.FC = () => {
                   description: editingTransaction.description,
                   category: editingTransaction.category._id,
                   date: (() => {
-                    // 處理不同的日期格式
-                    let dateStr = editingTransaction.date;
+                    // 確保日期格式為 YYYY-MM-DD
+                    const dateStr = editingTransaction.date;
                     
-                    // 如果是 MM/DD/YYYY 格式，轉換為 YYYY-MM-DD
+                    // 如果是 MM/DD/YYYY 格式（如 01/07/2025）
                     if (dateStr.includes('/')) {
-                      const [month, day, year] = dateStr.split('/');
-                      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                      const parts = dateStr.split('/');
+                      if (parts.length === 3) {
+                        const [month, day, year] = parts;
+                        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                      }
                     }
                     
-                    // 如果已經是 YYYY-MM-DD 格式或 ISO 格式
+                    // 如果是 ISO 格式（包含 T）
                     if (dateStr.includes('T')) {
                       return dateStr.split('T')[0];
                     }
                     
-                    return dateStr;
+                    // 如果已經是 YYYY-MM-DD 格式
+                    if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                      return dateStr;
+                    }
+                    
+                    // 嘗試解析日期並格式化
+                    try {
+                      const date = new Date(dateStr);
+                      const year = date.getFullYear();
+                      const month = String(date.getMonth() + 1).padStart(2, '0');
+                      const day = String(date.getDate()).padStart(2, '0');
+                      return `${year}-${month}-${day}`;
+                    } catch {
+                      return dateStr;
+                    }
                   })(),
                   notes: editingTransaction.notes,
                   tags: editingTransaction.tags
