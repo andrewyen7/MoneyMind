@@ -51,13 +51,6 @@ const TransactionsPage: React.FC = () => {
 
   useEffect(() => {
     loadData();
-    
-    // 每3秒自動重新整理交易列表
-    const interval = setInterval(() => {
-      loadData();
-    }, 3000);
-    
-    return () => clearInterval(interval);
   }, []);
 
   // Handle filter changes
@@ -71,7 +64,8 @@ const TransactionsPage: React.FC = () => {
       setIsSubmitting(true);
       await transactionService.createTransaction(data);
       setShowForm(false);
-      await loadData(); // Reload data
+      // 立即重新載入數據以顯示新交易
+      await loadData();
     } catch (error: any) {
       throw error; // Let the form handle the error
     } finally {

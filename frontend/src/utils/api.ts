@@ -14,12 +14,6 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Add timestamp to prevent caching
-    config.params = {
-      ...config.params,
-      _t: Date.now()
-    };
-
     return config;
   },
   (error) => {

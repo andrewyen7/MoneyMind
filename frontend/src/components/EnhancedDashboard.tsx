@@ -52,13 +52,6 @@ const EnhancedDashboard: React.FC = () => {
 
   useEffect(() => {
     loadDashboardData();
-    
-    // Auto-refresh every 3 seconds
-    const interval = setInterval(() => {
-      loadDashboardData();
-    }, 3000);
-    
-    return () => clearInterval(interval);
   }, []);
 
   // Prepare data for spending pie chart
