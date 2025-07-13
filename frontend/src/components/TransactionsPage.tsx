@@ -51,6 +51,13 @@ const TransactionsPage: React.FC = () => {
 
   useEffect(() => {
     loadData();
+    
+    // 每3秒自動重新整理交易列表
+    const interval = setInterval(() => {
+      loadData();
+    }, 3000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   // Handle filter changes

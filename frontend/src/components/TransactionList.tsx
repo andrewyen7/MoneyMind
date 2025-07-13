@@ -22,11 +22,14 @@ const TransactionList: React.FC<TransactionListProps> = ({
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    // 直接從字符串解析日期部分，避免時區轉換問題
+    const dateStr = dateString.split('T')[0]; // 獲取 YYYY-MM-DD 部分
+    const [year, month, day] = dateStr.split('-');
+    
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    return `${monthNames[parseInt(month) - 1]} ${parseInt(day)}, ${year}`;
   };
 
   if (isLoading) {
