@@ -248,12 +248,21 @@ const TransactionsPage: React.FC = () => {
                   description: editingTransaction.description,
                   category: editingTransaction.category._id,
                   date: (() => {
-                    // 確保日期格式為 YYYY-MM-DD
-                    const date = new Date(editingTransaction.date);
-                    const year = date.getFullYear();
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const day = String(date.getDate()).padStart(2, '0');
-                    return `${year}-${month}-${day}`;
+                    // 處理不同的日期格式
+                    let dateStr = editingTransaction.date;
+                    
+                    // 如果是 MM/DD/YYYY 格式，轉換為 YYYY-MM-DD
+                    if (dateStr.includes('/')) {
+                      const [month, day, year] = dateStr.split('/');
+                      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                    }
+                    
+                    // 如果已經是 YYYY-MM-DD 格式或 ISO 格式
+                    if (dateStr.includes('T')) {
+                      return dateStr.split('T')[0];
+                    }
+                    
+                    return dateStr;
                   })(),
                   notes: editingTransaction.notes,
                   tags: editingTransaction.tags
