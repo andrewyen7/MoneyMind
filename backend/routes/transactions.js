@@ -327,15 +327,21 @@ router.put('/:id', ensureAuthenticated, async (req, res) => {
     if (description) transaction.description = description.trim();
     if (category) transaction.category = category;
     
-    // Fix date handling by parsing date parts directly to avoid timezone issues
+    // Fix date handling - handle both YYYY-MM-DD and MM/DD/YYYY formats
     if (date) {
-      const dateParts = date.split('-');
-      if (dateParts.length === 3) {
-        // Create date with year, month (0-indexed), day
-        transaction.date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+      let transactionDate;
+      if (date.includes('/')) {
+        // Handle MM/DD/YYYY format
+        const [month, day, year] = date.split('/');
+        transactionDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      } else if (date.includes('-')) {
+        // Handle YYYY-MM-DD format
+        const [year, month, day] = date.split('-');
+        transactionDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
       } else {
-        transaction.date = new Date(date);
+        transactionDate = new Date(date);
       }
+      transaction.date = transactionDate;
     }
     
     if (notes !== undefined) transaction.notes = notes ? notes.trim() : undefined;
