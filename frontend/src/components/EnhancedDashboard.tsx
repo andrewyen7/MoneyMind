@@ -84,17 +84,46 @@ const EnhancedDashboard: React.FC = () => {
     }));
   };
 
-  // Prepare data for monthly trends (mock data for now)
+  // Prepare data for monthly trends from real transaction data
   const getMonthlyTrends = () => {
-    // In a real app, this would come from an API endpoint
-    return [
-      { month: 'Jan', income: 3500, expenses: 2800, net: 700 },
-      { month: 'Feb', income: 3500, expenses: 3200, net: 300 },
-      { month: 'Mar', income: 3500, expenses: 2600, net: 900 },
-      { month: 'Apr', income: 3500, expenses: 3100, net: 400 },
-      { month: 'May', income: 3500, expenses: 2900, net: 600 },
-      { month: 'Jun', income: 3500, expenses: 3000, net: 500 },
-    ];
+    const monthlyData: { [key: string]: { income: number; expenses: number } } = {};
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    // Initialize last 6 months with zero values
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const monthName = monthNames[date.getMonth()];
+      monthlyData[monthKey] = { income: 0, expenses: 0 };
+    }
+    
+    // Process all transactions to get real monthly data
+    [...transactions, ...allExpenseTransactions].forEach(transaction => {
+      const date = new Date(transaction.date);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      
+      if (monthlyData[monthKey]) {
+        if (transaction.type === 'income') {
+          monthlyData[monthKey].income += transaction.amount;
+        } else {
+          monthlyData[monthKey].expenses += transaction.amount;
+        }
+      }
+    });
+    
+    // Convert to chart format
+    return Object.keys(monthlyData).map(monthKey => {
+      const [year, month] = monthKey.split('-');
+      const monthName = monthNames[parseInt(month) - 1];
+      const data = monthlyData[monthKey];
+      return {
+        month: monthName,
+        income: data.income,
+        expenses: data.expenses,
+        net: data.income - data.expenses
+      };
+    });
   };
 
   const formatCurrency = (amount: number) => {
