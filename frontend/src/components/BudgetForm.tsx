@@ -55,18 +55,25 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
   // Calculate end date when start date or period changes
   useEffect(() => {
     if (formData.startDate && formData.period) {
-      const start = new Date(formData.startDate);
+      // Parse date parts directly to avoid timezone issues
+      const [year, month, day] = formData.startDate.split('-').map(Number);
       let endDate: Date;
       
       if (formData.period === 'monthly') {
-        endDate = new Date(start.getFullYear(), start.getMonth() + 1, 0);
+        // Get the last day of the same month as start date
+        endDate = new Date(year, month, 0); // month is 1-indexed, so this gets last day of that month
       } else {
-        endDate = new Date(start.getFullYear(), 11, 31);
+        // For yearly, end on December 31st of the same year
+        endDate = new Date(year, 11, 31);
       }
+      
+      const endYear = endDate.getFullYear();
+      const endMonth = String(endDate.getMonth() + 1).padStart(2, '0');
+      const endDay = String(endDate.getDate()).padStart(2, '0');
       
       setFormData(prev => ({
         ...prev,
-        endDate: endDate.toISOString().split('T')[0]
+        endDate: `${endYear}-${endMonth}-${endDay}`
       }));
     }
   }, [formData.startDate, formData.period]);
