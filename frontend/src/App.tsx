@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import { DashboardProvider } from './contexts/DashboardContext';
+// import { DashboardProvider } from './contexts/DashboardContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
