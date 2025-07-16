@@ -44,10 +44,12 @@ const BudgetsPage: React.FC = () => {
   const handleCreateBudget = async (data: BudgetFormData) => {
     try {
       setIsSubmitting(true);
+      console.log('Creating budget with data:', data);
       await budgetService.createBudget(data);
       setShowForm(false);
       await loadData();
     } catch (error: any) {
+      console.error('Budget creation failed:', error);
       throw error;
     } finally {
       setIsSubmitting(false);
