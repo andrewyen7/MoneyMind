@@ -42,6 +42,8 @@ const EnhancedDashboard: React.FC = () => {
       
       setTransactions(recentTransactionsData.transactions);
       setAllExpenseTransactions(allExpenseTransactionsData.transactions);
+      console.log('All expense transactions loaded:', allExpenseTransactionsData.transactions);
+      console.log('Recent transactions loaded:', recentTransactionsData.transactions);
       setStats(statsData);
       setBudgets(budgetsData);
       setBudgetSummary(budgetSummaryData);
