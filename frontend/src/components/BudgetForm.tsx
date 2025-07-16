@@ -16,14 +16,14 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
   isLoading = false
 }) => {
   const [formData, setFormData] = useState<BudgetFormData>({
-    name: '',
-    category: '',
-    amount: 0,
-    period: 'monthly',
-    startDate: new Date().toISOString().split('T')[0],
-    alertThreshold: 80,
-    notes: '',
-    ...initialData
+    name: initialData?.name || '',
+    category: initialData?.category || '',
+    amount: initialData?.amount || 0,
+    period: initialData?.period || 'monthly',
+    startDate: initialData?.startDate || new Date().toISOString().split('T')[0],
+    endDate: initialData?.endDate || '',
+    alertThreshold: initialData?.alertThreshold || 80,
+    notes: initialData?.notes || ''
   });
 
   const [categories, setCategories] = useState<Category[]>([]);
