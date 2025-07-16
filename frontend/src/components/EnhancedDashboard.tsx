@@ -34,7 +34,7 @@ const EnhancedDashboard: React.FC = () => {
         budgetSummaryData
       ] = await Promise.all([
         transactionService.getTransactions({ limit: 5, sortBy: 'date', sortOrder: 'desc' }),
-        transactionService.getTransactions({ type: 'expense', limit: 100 }),
+        transactionService.getTransactions({ type: 'expense', limit: 1000, sortBy: 'date', sortOrder: 'desc' }),
         transactionService.getTransactionStats(),
         budgetService.getBudgets({ period: 'monthly' }),
         budgetService.getBudgetSummary('monthly')
