@@ -12,6 +12,7 @@ import budgetService, { Budget, BudgetSummary } from '../services/budgetService'
 
 const EnhancedDashboard: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [allExpenseTransactions, setAllExpenseTransactions] = useState<Transaction[]>([]);
   const [stats, setStats] = useState<TransactionStats | null>(null);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [budgetSummary, setBudgetSummary] = useState<BudgetSummary | null>(null);
@@ -26,18 +27,21 @@ const EnhancedDashboard: React.FC = () => {
       setError(null);
       
       const [
-        transactionsData,
+        recentTransactionsData,
+        allExpenseTransactionsData,
         statsData,
         budgetsData,
         budgetSummaryData
       ] = await Promise.all([
         transactionService.getTransactions({ limit: 5, sortBy: 'date', sortOrder: 'desc' }),
+        transactionService.getTransactions({ type: 'expense', limit: 100 }),
         transactionService.getTransactionStats(),
         budgetService.getBudgets({ period: 'monthly' }),
         budgetService.getBudgetSummary('monthly')
       ]);
       
-      setTransactions(transactionsData.transactions);
+      setTransactions(recentTransactionsData.transactions);
+      setAllExpenseTransactions(allExpenseTransactionsData.transactions);
       setStats(statsData);
       setBudgets(budgetsData);
       setBudgetSummary(budgetSummaryData);
@@ -58,8 +62,7 @@ const EnhancedDashboard: React.FC = () => {
   const getSpendingByCategory = () => {
     const categorySpending: { [key: string]: { amount: number; color: string; icon: string; name: string } } = {};
     
-    transactions
-      .filter(t => t.type === 'expense')
+    allExpenseTransactions
       .forEach(transaction => {
         const categoryId = transaction.category._id;
         if (!categorySpending[categoryId]) {
