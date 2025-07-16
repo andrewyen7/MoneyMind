@@ -136,6 +136,16 @@ router.post('/', ensureAuthenticated, async (req, res) => {
     } else if (period === 'yearly') {
       endDate = new Date(start.getFullYear(), 11, 31);
     }
+    
+    console.log('Creating budget with data:', {
+      name: name.trim(),
+      category,
+      amount: parseFloat(amount),
+      period,
+      startDate: start,
+      endDate,
+      alertThreshold: alertThreshold || 80
+    });
 
     // Create budget
     const newBudget = new Budget({
@@ -171,9 +181,15 @@ router.post('/', ensureAuthenticated, async (req, res) => {
     });
   } catch (error) {
     console.error('Create budget error:', error);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
     
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map(err => err.message);
+      console.error('Validation errors:', errors);
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
@@ -181,9 +197,17 @@ router.post('/', ensureAuthenticated, async (req, res) => {
       });
     }
     
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid data format provided'
+      });
+    }
+    
     res.status(500).json({
       success: false,
-      message: 'Server error while creating budget'
+      message: 'Server error while creating budget',
+      error: error.message
     });
   }
 });
