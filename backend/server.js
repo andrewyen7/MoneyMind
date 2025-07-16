@@ -76,6 +76,10 @@ connectDB().then(() => {
 });
 
 // Start server
+// Start the server with corrected routes
 app.listen(PORT, () => {
-  console.log(`MoneyMind Server FIXED - running on port ${PORT} - budgets route corrected`);
+  console.log(`✅ MoneyMind Server Started Successfully`);
+  console.log(`🚀 Port: ${PORT}`);
+  console.log(`📊 Routes: /api/budgets (NOT budgets1)`);
+  console.log(`🔧 Fixed: Budget creation and pie chart`);
 });
