@@ -57,23 +57,21 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
     if (formData.startDate && formData.period) {
       // Parse date parts directly to avoid timezone issues
       const [year, month, day] = formData.startDate.split('-').map(Number);
-      let endDate: Date;
+      let endDateStr: string;
       
       if (formData.period === 'monthly') {
         // Get the last day of the same month as start date
-        endDate = new Date(year, month, 0); // month is 1-indexed, so this gets last day of that month
+        // Create date object for the first day of next month, then subtract 1 day
+        const lastDayOfMonth = new Date(year, month, 0).getDate();
+        endDateStr = `${year}-${String(month).padStart(2, '0')}-${String(lastDayOfMonth).padStart(2, '0')}`;
       } else {
         // For yearly, end on December 31st of the same year
-        endDate = new Date(year, 11, 31);
+        endDateStr = `${year}-12-31`;
       }
-      
-      const endYear = endDate.getFullYear();
-      const endMonth = String(endDate.getMonth() + 1).padStart(2, '0');
-      const endDay = String(endDate.getDate()).padStart(2, '0');
       
       setFormData(prev => ({
         ...prev,
-        endDate: `${endYear}-${endMonth}-${endDay}`
+        endDate: endDateStr
       }));
     }
   }, [formData.startDate, formData.period]);
