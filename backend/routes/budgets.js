@@ -4,6 +4,7 @@ const Category = require('../models/Category');
 const { ensureAuthenticated } = require('../middleware/auth');
 
 const router = express.Router();
+console.log('✅ Budget routes loaded - should be /api/budgets NOT /api/budgets1');
 
 // @route   GET /api/budgets
 // @desc    Get user's budgets with spending data
