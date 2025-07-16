@@ -77,5 +77,5 @@ connectDB().then(() => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`MoneyMind Server FIXED - running on port ${PORT} - budgets route corrected`);
 });
