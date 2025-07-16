@@ -63,11 +63,11 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Routes - FIXED budgets route (not budgets1) - 2025-07-15
+// API Routes - Corrected 2025-07-15
 app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/transactions', transactionRoutes);
-app.use('/api/budgets', budgetRoutes); // This should be /api/budgets NOT /api/budgets1
+app.use('/api/budgets', budgetRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
 // Connect to database and seed
