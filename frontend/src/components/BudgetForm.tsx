@@ -106,12 +106,26 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
     }
 
     try {
-      await onSubmit({
+      const submitData = {
         ...formData,
         name: formData.name.trim(),
         notes: formData.notes?.trim() || undefined
-      });
+      };
+      
+      // Ensure endDate is set
+      if (!submitData.endDate) {
+        const start = new Date(submitData.startDate);
+        if (submitData.period === 'monthly') {
+          submitData.endDate = new Date(start.getFullYear(), start.getMonth() + 1, 0).toISOString().split('T')[0];
+        } else {
+          submitData.endDate = new Date(start.getFullYear(), 11, 31).toISOString().split('T')[0];
+        }
+      }
+      
+      console.log('Submitting budget data:', submitData);
+      await onSubmit(submitData);
     } catch (error: any) {
+      console.error('Form submission error:', error);
       setError(error.message);
     }
   };
