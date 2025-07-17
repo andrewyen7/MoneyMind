@@ -12,13 +12,16 @@ class PerformanceMonitor {
 
   // Start timing an operation
   start(name: string, metadata?: Record<string, any>): void {
-    const metric: PerformanceMetric = {
-      name,
-      startTime: performance.now(),
-      metadata
-    };
-    
-    this.metrics.set(name, metric);
+    // Check if metric already exists to avoid duplicates
+    if (!this.metrics.has(name)) {
+      const metric: PerformanceMetric = {
+        name,
+        startTime: performance.now(),
+        metadata
+      };
+      
+      this.metrics.set(name, metric);
+    }
   }
 
   // End timing an operation
@@ -26,8 +29,13 @@ class PerformanceMonitor {
     const metric = this.metrics.get(name);
     
     if (!metric) {
-      console.warn(`Performance metric "${name}" not found`);
-      return null;
+      // Instead of warning, create the metric if it doesn't exist
+      this.start(name);
+      const newMetric = this.metrics.get(name);
+      if (!newMetric) {
+        return null;
+      }
+      return this.end(name);
     }
 
     const endTime = performance.now();

@@ -177,13 +177,18 @@ class TransactionService {
     }
 
     try {
-      const result = await performanceMonitor.measure('get-transactions', async () => {
-        const response = await api.get('/transactions', { params: filters });
-        return {
-          transactions: response.data.transactions,
-          pagination: response.data.pagination
-        };
-      });
+      // Use a unique metric name for each call to avoid conflicts
+      const metricName = `api-get-transactions-${Date.now()}`;
+      performanceMonitor.start(metricName);
+      
+      const response = await api.get('/transactions', { params: filters });
+      const result = {
+        transactions: response.data.transactions,
+        pagination: response.data.pagination
+      };
+      
+      // End performance measurement
+      performanceMonitor.end(metricName);
 
       // Cache the result for 2 minutes
       cache.set(cacheKey, result, 2 * 60 * 1000);

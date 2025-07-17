@@ -40,12 +40,18 @@ const MonthlyTrendsChart: React.FC<MonthlyTrendsChartProps> = ({
   console.log('Raw monthly trends data:', rawData);
   
   // Filter out any invalid data entries and ensure values are numbers
-  const data = rawData.map(item => ({
-    month: item.month,
-    income: Number(item.income) || 0,
-    expenses: Number(item.expenses) || 0,
-    net: Number(item.net) || 0
-  }));
+  const monthOrder = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 
+                      'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12};
+  
+  const data = rawData
+    .map(item => ({
+      month: item.month,
+      income: Number(item.income) || 0,
+      expenses: Number(item.expenses) || 0,
+      net: Number(item.net) || 0,
+      monthOrder: monthOrder[item.month] || 0
+    }))
+    .sort((a, b) => a.monthOrder - b.monthOrder);
   
   // Log the processed data for debugging
   console.log('Processed monthly trends data:', data);

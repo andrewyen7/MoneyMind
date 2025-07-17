@@ -14,6 +14,7 @@ import { directApi } from '../utils/directApi';
 const EnhancedDashboard: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [allExpenseTransactions, setAllExpenseTransactions] = useState<Transaction[]>([]);
+  const [allIncomeTransactions, setAllIncomeTransactions] = useState<Transaction[]>([]);
   const [stats, setStats] = useState<TransactionStats | null>(null);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [budgetSummary, setBudgetSummary] = useState<BudgetSummary | null>(null);
@@ -30,12 +31,14 @@ const EnhancedDashboard: React.FC = () => {
       const [
         recentTransactionsData,
         allExpenseTransactionsData,
+        allIncomeTransactionsData,
         statsData,
         budgetsData,
         budgetSummaryData
       ] = await Promise.all([
         transactionService.getTransactions({ limit: 5, sortBy: 'date', sortOrder: 'desc' }),
         transactionService.getTransactions({ type: 'expense', limit: 1000, sortBy: 'date', sortOrder: 'desc' }),
+        transactionService.getTransactions({ type: 'income', limit: 1000, sortBy: 'date', sortOrder: 'desc' }),
         transactionService.getTransactionStats(),
         directApi.getBudgets({ period: 'monthly' }),
         directApi.getBudgetSummary('monthly')
@@ -43,8 +46,12 @@ const EnhancedDashboard: React.FC = () => {
       
       setTransactions(recentTransactionsData.transactions);
       setAllExpenseTransactions(allExpenseTransactionsData.transactions);
-      console.log('All expense transactions loaded:', allExpenseTransactionsData.transactions);
-      console.log('Recent transactions loaded:', recentTransactionsData.transactions);
+      setAllIncomeTransactions(allIncomeTransactionsData.transactions);
+      
+      console.log('All expense transactions loaded:', allExpenseTransactionsData.transactions.length);
+      console.log('All income transactions loaded:', allIncomeTransactionsData.transactions.length);
+      console.log('Recent transactions loaded:', recentTransactionsData.transactions.length);
+      
       setStats(statsData);
       setBudgets(budgetsData);
       setBudgetSummary(budgetSummaryData);
@@ -92,23 +99,32 @@ const EnhancedDashboard: React.FC = () => {
     const monthlyData: { [key: string]: { income: number; expenses: number } } = {};
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     
-    // Initialize last 6 months with zero values
+    // Initialize all months of the current year with zero values
     const now = new Date();
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      const monthName = monthNames[date.getMonth()];
+    const currentYear = now.getFullYear();
+    
+    // Add all months of the current year
+    for (let month = 0; month < 12; month++) {
+      const monthKey = `${currentYear}-${String(month + 1).padStart(2, '0')}`;
+      const monthName = monthNames[month];
       monthlyData[monthKey] = { income: 0, expenses: 0 };
     }
     
     console.log('Processing transactions for monthly trends...');
     
     // Get all transactions (both income and expense)
-    const allTransactions = [...transactions, ...allExpenseTransactions];
+    const allTransactions = [...transactions, ...allExpenseTransactions, ...allIncomeTransactions];
+    
+    // Remove duplicates by ID
+    const uniqueTransactions = Array.from(
+      new Map(allTransactions.map(item => [item._id, item])).values()
+    );
+    
+    console.log(`Total unique transactions for monthly trends: ${uniqueTransactions.length}`);
     console.log(`Total transactions to process: ${allTransactions.length}`);
     
     // Process all transactions to get real monthly data
-    allTransactions.forEach(transaction => {
+    uniqueTransactions.forEach(transaction => {
       if (!transaction || !transaction.date) {
         console.log('Invalid transaction found:', transaction);
         return;
@@ -119,12 +135,14 @@ const EnhancedDashboard: React.FC = () => {
       
       if (monthlyData[monthKey]) {
         if (transaction.type === 'income') {
-          console.log(`Adding income: ${transaction.amount} for ${monthKey}`);
+          console.log(`Adding income: ${transaction.amount} for ${monthKey} - ${transaction.description}`);
           monthlyData[monthKey].income += Number(transaction.amount) || 0;
         } else {
-          console.log(`Adding expense: ${transaction.amount} for ${monthKey}`);
+          console.log(`Adding expense: ${transaction.amount} for ${monthKey} - ${transaction.description}`);
           monthlyData[monthKey].expenses += Number(transaction.amount) || 0;
         }
+      } else {
+        console.log(`Month key not found: ${monthKey} for transaction dated ${transaction.date}`);
       }
     });
     
