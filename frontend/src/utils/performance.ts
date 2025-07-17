@@ -29,13 +29,8 @@ class PerformanceMonitor {
     const metric = this.metrics.get(name);
     
     if (!metric) {
-      // Instead of warning, create the metric if it doesn't exist
-      this.start(name);
-      const newMetric = this.metrics.get(name);
-      if (!newMetric) {
-        return null;
-      }
-      return this.end(name);
+      // Silently return null instead of warning
+      return null;
     }
 
     const endTime = performance.now();
