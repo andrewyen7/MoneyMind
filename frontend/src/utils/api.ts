@@ -20,7 +20,7 @@ api.get = function<T = any, R = AxiosResponse<T>, D = any>(
   if (url && url.includes('budgets1')) {
     url = url.replace('budgets1', 'budgets');
   }
-  return originalGet.call(this, url, config);
+  return originalGet.call(this, url, config) as Promise<R>;
 };
 
 const originalPost = api.post;
@@ -32,7 +32,7 @@ api.post = function<T = any, R = AxiosResponse<T>, D = any>(
   if (url && url.includes('budgets1')) {
     url = url.replace('budgets1', 'budgets');
   }
-  return originalPost.call(this, url, data, config);
+  return originalPost.call(this, url, data, config) as Promise<R>;
 };
 
 // Override specific endpoints that have issues
