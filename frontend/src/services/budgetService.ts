@@ -86,26 +86,22 @@ class BudgetService {
   // Create budget
   async createBudget(budgetData: BudgetFormData): Promise<Budget> {
     try {
-      // Use fetch directly with the correct URL to bypass any typo
-      const response = await fetch('https://moneymind-g1po.onrender.com/api/budgets', {
-        method: 'POST',
-        credentials: 'include',
+      // Use axios directly with the correct URL to bypass any typo
+      const response = await axios({
+        method: 'post',
+        url: 'https://moneymind-g1po.onrender.com/api/budgets',
+        data: budgetData,
+        withCredentials: true,
         headers: {
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(budgetData)
+        }
       });
       
-      if (!response.ok) {
-        throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      console.log('Budget creation response:', data);
-      return data.budget;
+      console.log('Budget creation response:', response.data);
+      return response.data.budget;
     } catch (error: any) {
       console.error('Budget creation error:', error);
-      throw new Error(error.message || 'Failed to create budget');
+      throw new Error(error.response?.data?.message || 'Failed to create budget');
     }
   }
 
