@@ -17,6 +17,10 @@ const budgetsEndpoint = '/budgets'; // NOT '/budgets1'
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
+    // Fix the budgets1 typo by replacing it with budgets
+    if (config.url && config.url.includes('budgets1')) {
+      config.url = config.url.replace('budgets1', 'budgets');
+    }
     return config;
   },
   (error) => {
