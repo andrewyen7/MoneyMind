@@ -11,6 +11,9 @@ const api = axios.create({
   },
 });
 
+// Override specific endpoints that have issues
+const budgetsEndpoint = '/budgets'; // NOT '/budgets1'
+
 // Request interceptor
 api.interceptors.request.use(
   (config) => {

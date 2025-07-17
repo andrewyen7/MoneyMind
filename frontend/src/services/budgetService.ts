@@ -1,4 +1,5 @@
 import api from '../utils/api';
+import axios from 'axios';
 import { Category } from './transactionService';
 
 export interface Budget {
@@ -85,10 +86,26 @@ class BudgetService {
   // Create budget
   async createBudget(budgetData: BudgetFormData): Promise<Budget> {
     try {
-      const response = await api.post('/budgets', budgetData);
-      return response.data.budget;
+      // Use fetch directly with the correct URL to bypass any typo
+      const response = await fetch('https://moneymind-g1po.onrender.com/api/budgets', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(budgetData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Budget creation response:', data);
+      return data.budget;
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Failed to create budget');
+      console.error('Budget creation error:', error);
+      throw new Error(error.message || 'Failed to create budget');
     }
   }
 
