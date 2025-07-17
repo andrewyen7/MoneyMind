@@ -45,7 +45,21 @@ const BudgetsPage: React.FC = () => {
     try {
       setIsSubmitting(true);
       console.log('Creating budget with data:', data);
-      await budgetService.createBudget(data);
+      
+      // Use direct axios call with correct URL to bypass the budgets1 typo
+      const response = await fetch('https://moneymind-g1po.onrender.com/api/budgets', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+      }
+      
       setShowForm(false);
       await loadData();
     } catch (error: any) {
