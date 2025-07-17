@@ -1,6 +1,6 @@
 import React from 'react';
-import { Budget } from '../services/budgetService';
-import budgetService from '../services/budgetService';
+import { Budget } from '../services/budgetService'; // Only for type, not for formatting
+import { formatCurrency, getStatusColor, getStatusText, getDaysRemaining, getPeriodDisplayText } from '../utils/formatters';
 
 interface BudgetCardProps {
   budget: Budget;
@@ -14,9 +14,9 @@ const BudgetCard: React.FC<BudgetCardProps> = ({ budget, onEdit, onDelete }) => 
   const percentageUsed = budget.percentageUsed || 0;
   const status = budget.status || 'good';
   
-  const statusColor = budgetService.getStatusColor(status);
-  const statusText = budgetService.getStatusText(status);
-  const daysRemaining = budgetService.getDaysRemaining(budget.endDate);
+  const statusColor = getStatusColor(status);
+  const statusText = getStatusText(status);
+  const daysRemaining = getDaysRemaining(budget.endDate);
 
   const getProgressBarColor = () => {
     if (percentageUsed >= 100) return 'bg-red-500';
@@ -84,19 +84,19 @@ const BudgetCard: React.FC<BudgetCardProps> = ({ budget, onEdit, onDelete }) => 
         <div className="text-center">
           <p className="text-sm text-gray-500">Budgeted</p>
           <p className="text-lg font-semibold text-gray-900">
-            {budgetService.formatCurrency(budget.amount)}
+            {formatCurrency(budget.amount)}
           </p>
         </div>
         <div className="text-center">
           <p className="text-sm text-gray-500">Spent</p>
           <p className={`text-lg font-semibold ${spent > budget.amount ? 'text-red-600' : 'text-gray-900'}`}>
-            {budgetService.formatCurrency(spent)}
+            {formatCurrency(spent)}
           </p>
         </div>
         <div className="text-center">
           <p className="text-sm text-gray-500">Remaining</p>
           <p className={`text-lg font-semibold ${remaining < 0 ? 'text-red-600' : 'text-green-600'}`}>
-            {budgetService.formatCurrency(Math.max(0, remaining))}
+            {formatCurrency(Math.max(0, remaining))}
           </p>
         </div>
       </div>
@@ -123,7 +123,7 @@ const BudgetCard: React.FC<BudgetCardProps> = ({ budget, onEdit, onDelete }) => 
       {/* Additional Info */}
       <div className="flex justify-between items-center text-sm text-gray-500">
         <div className="flex items-center space-x-4">
-          <span className="capitalize">{budgetService.getPeriodDisplayText(budget.period)}</span>
+          <span className="capitalize">{getPeriodDisplayText(budget.period)}</span>
           {budget.transactionCount !== undefined && (
             <span>{budget.transactionCount} transactions</span>
           )}
@@ -153,7 +153,7 @@ const BudgetCard: React.FC<BudgetCardProps> = ({ budget, onEdit, onDelete }) => 
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
             <p className="text-sm text-red-800">
-              You're over budget by {budgetService.formatCurrency(spent - budget.amount)}
+              You're over budget by {formatCurrency(spent - budget.amount)}
             </p>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-// import { DashboardProvider } from './contexts/DashboardContext';
+import { DashboardProvider } from './contexts/DashboardContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
@@ -16,71 +16,71 @@ import { ToastProvider } from './components/shared/Toast';
 
 function App() {
   return (
-    <ErrorBoundary>
-      <ToastProvider>
-        <AuthProvider>
-          <DashboardProvider>
+    <DashboardProvider>
+      <ErrorBoundary>
+        <ToastProvider>
+          <AuthProvider>
             <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <div className="App">
-              <Routes>
-                {/* Public routes */}
-                <Route path="/login" element={<LoginForm />} />
-                <Route path="/register" element={<RegisterForm />} />
+              <div className="App">
+                <Routes>
+                  {/* Public routes */}
+                  <Route path="/login" element={<LoginForm />} />
+                  <Route path="/register" element={<RegisterForm />} />
 
-                {/* Protected routes */}
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <EnhancedDashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/transactions"
-                  element={
-                    <ProtectedRoute>
-                      <TransactionsPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/categories"
-                  element={
-                    <ProtectedRoute>
-                      <CategoriesPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/budgets"
-                  element={
-                    <ProtectedRoute>
-                      <BudgetsPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/expense-analytics"
-                  element={
-                    <ProtectedRoute>
-                      <ExpenseAnalytics />
-                    </ProtectedRoute>
-                  }
-                />
+                  {/* Protected routes */}
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <EnhancedDashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/transactions"
+                    element={
+                      <ProtectedRoute>
+                        <TransactionsPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/categories"
+                    element={
+                      <ProtectedRoute>
+                        <CategoriesPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/budgets"
+                    element={
+                      <ProtectedRoute>
+                        <BudgetsPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/expense-analytics"
+                    element={
+                      <ProtectedRoute>
+                        <ExpenseAnalytics />
+                      </ProtectedRoute>
+                    }
+                  />
 
-                {/* Default redirect */}
-                <Route path="/" element={<Navigate to="/login" replace />} />
+                  {/* Default redirect */}
+                  <Route path="/" element={<Navigate to="/login" replace />} />
 
-                {/* Catch all route - redirect to login for unknown routes */}
-                <Route path="*" element={<Navigate to="/login" replace />} />
-              </Routes>
-            </div>
+                  {/* Catch all route - redirect to login for unknown routes */}
+                  <Route path="*" element={<Navigate to="/login" replace />} />
+                </Routes>
+              </div>
             </Router>
-          </DashboardProvider>
-        </AuthProvider>
-      </ToastProvider>
-    </ErrorBoundary>
+          </AuthProvider>
+        </ToastProvider>
+      </ErrorBoundary>
+    </DashboardProvider>
   );
 }
 

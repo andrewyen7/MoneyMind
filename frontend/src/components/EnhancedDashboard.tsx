@@ -8,7 +8,8 @@ import SpendingPieChart from './charts/SpendingPieChart';
 import MonthlyTrendsChart from './charts/MonthlyTrendsChart';
 import BudgetProgressChart from './charts/BudgetProgressChart';
 import transactionService, { Transaction, TransactionStats } from '../services/transactionService';
-import budgetService, { Budget, BudgetSummary } from '../services/budgetService';
+import { Budget, BudgetSummary } from '../services/budgetService';
+import { directApi } from '../utils/directApi';
 
 const EnhancedDashboard: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -36,8 +37,8 @@ const EnhancedDashboard: React.FC = () => {
         transactionService.getTransactions({ limit: 5, sortBy: 'date', sortOrder: 'desc' }),
         transactionService.getTransactions({ type: 'expense', limit: 1000, sortBy: 'date', sortOrder: 'desc' }),
         transactionService.getTransactionStats(),
-        budgetService.getBudgets({ period: 'monthly' }),
-        budgetService.getBudgetSummary('monthly')
+        directApi.getBudgets({ period: 'monthly' }),
+        directApi.getBudgetSummary('monthly')
       ]);
       
       setTransactions(recentTransactionsData.transactions);
@@ -100,32 +101,50 @@ const EnhancedDashboard: React.FC = () => {
       monthlyData[monthKey] = { income: 0, expenses: 0 };
     }
     
+    console.log('Processing transactions for monthly trends...');
+    
+    // Get all transactions (both income and expense)
+    const allTransactions = [...transactions, ...allExpenseTransactions];
+    console.log(`Total transactions to process: ${allTransactions.length}`);
+    
     // Process all transactions to get real monthly data
-    [...transactions, ...allExpenseTransactions].forEach(transaction => {
+    allTransactions.forEach(transaction => {
+      if (!transaction || !transaction.date) {
+        console.log('Invalid transaction found:', transaction);
+        return;
+      }
+      
       const date = new Date(transaction.date);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       
       if (monthlyData[monthKey]) {
         if (transaction.type === 'income') {
-          monthlyData[monthKey].income += transaction.amount;
+          console.log(`Adding income: ${transaction.amount} for ${monthKey}`);
+          monthlyData[monthKey].income += Number(transaction.amount) || 0;
         } else {
-          monthlyData[monthKey].expenses += transaction.amount;
+          console.log(`Adding expense: ${transaction.amount} for ${monthKey}`);
+          monthlyData[monthKey].expenses += Number(transaction.amount) || 0;
         }
       }
     });
     
+    console.log('Monthly data after processing:', monthlyData);
+    
     // Convert to chart format
-    return Object.keys(monthlyData).map(monthKey => {
+    const result = Object.keys(monthlyData).map(monthKey => {
       const [year, month] = monthKey.split('-');
       const monthName = monthNames[parseInt(month) - 1];
       const data = monthlyData[monthKey];
       return {
         month: monthName,
-        income: data.income,
-        expenses: data.expenses,
-        net: data.income - data.expenses
+        income: Number(data.income) || 0,
+        expenses: Number(data.expenses) || 0,
+        net: (Number(data.income) || 0) - (Number(data.expenses) || 0)
       };
     });
+    
+    console.log('Final monthly trends data:', result);
+    return result;
   };
 
   const formatCurrency = (amount: number) => {

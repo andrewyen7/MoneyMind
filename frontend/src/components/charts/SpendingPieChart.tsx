@@ -23,9 +23,14 @@ interface SpendingPieChartProps {
 }
 
 const SpendingPieChart: React.FC<SpendingPieChartProps> = ({ 
-  data, 
+  data: rawData, 
   title = "Spending by Category" 
 }) => {
+  // Filter out any invalid data entries
+  const data = rawData.filter(item => item && item.category && item.amount);
+  
+  // Log the filtered data for debugging
+  console.log('Filtered pie chart data:', data);
   const chartData = {
     labels: data.map(item => item.category),
     datasets: [

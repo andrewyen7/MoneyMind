@@ -4,7 +4,10 @@ import Navigation from './shared/Navigation';
 import Header from './shared/Header';
 import BudgetForm from './BudgetForm';
 import BudgetCard from './BudgetCard';
-import budgetService, { Budget, BudgetFormData, BudgetSummary } from '../services/budgetService';
+import { Budget, BudgetFormData, BudgetSummary } from '../services/budgetService';
+import { directApi } from '../utils/directApi';
+
+import { formatCurrency } from '../utils/formatters';
 
 const BudgetsPage: React.FC = () => {
   const { state } = useAuth();
@@ -24,13 +27,14 @@ const BudgetsPage: React.FC = () => {
       setError(null);
       
       const [budgetsData, summaryData] = await Promise.all([
-        budgetService.getBudgets({ period: periodFilter }),
-        budgetService.getBudgetSummary(periodFilter)
+        directApi.getBudgets({ period: periodFilter }),
+        directApi.getBudgetSummary(periodFilter)
       ]);
       
       setBudgets(budgetsData);
       setSummary(summaryData);
     } catch (error: any) {
+      console.error('Error loading budget data:', error);
       setError(error.message);
     } finally {
       setIsLoading(false);
@@ -46,19 +50,9 @@ const BudgetsPage: React.FC = () => {
       setIsSubmitting(true);
       console.log('Creating budget with data:', data);
       
-      // Use direct axios call with correct URL to bypass the budgets1 typo
-      const response = await fetch('https://moneymind-g1po.onrender.com/api/budgets', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
-      }
+      // Use direct API call with the correct URL (without the typo)
+      const response = await directApi.createBudget(data);
+      console.log('Budget created successfully:', response);
       
       setShowForm(false);
       await loadData();
@@ -75,11 +69,17 @@ const BudgetsPage: React.FC = () => {
     
     try {
       setIsSubmitting(true);
-      await budgetService.updateBudget(editingBudget._id, data);
+      console.log('Updating budget with data:', data);
+      
+      // Use direct API call to update budget
+      await directApi.updateBudget(editingBudget._id, data);
+      console.log('Budget updated successfully');
+      
       setEditingBudget(null);
       setShowForm(false);
       await loadData();
     } catch (error: any) {
+      console.error('Budget update failed:', error);
       throw error;
     } finally {
       setIsSubmitting(false);
@@ -97,9 +97,12 @@ const BudgetsPage: React.FC = () => {
     }
 
     try {
-      await budgetService.deleteBudget(id);
+      console.log('Deleting budget with ID:', id);
+      await directApi.deleteBudget(id);
+      console.log('Budget deleted successfully');
       await loadData();
     } catch (error: any) {
+      console.error('Budget deletion failed:', error);
       setError(error.message);
     }
   };
@@ -175,7 +178,7 @@ const BudgetsPage: React.FC = () => {
                           Total Budgeted
                         </dt>
                         <dd className="text-lg font-medium text-gray-900">
-                          {budgetService.formatCurrency(summary.totalBudgeted)}
+                          {formatCurrency(summary.totalBudgeted)}
                         </dd>
                       </dl>
                     </div>
@@ -197,7 +200,7 @@ const BudgetsPage: React.FC = () => {
                           Total Spent
                         </dt>
                         <dd className="text-lg font-medium text-gray-900">
-                          {budgetService.formatCurrency(summary.totalSpent)}
+                          {formatCurrency(summary.totalSpent)}
                         </dd>
                       </dl>
                     </div>
@@ -219,7 +222,7 @@ const BudgetsPage: React.FC = () => {
                           Remaining
                         </dt>
                         <dd className="text-lg font-medium text-green-600">
-                          {budgetService.formatCurrency(summary.totalRemaining)}
+                          {formatCurrency(summary.totalRemaining)}
                         </dd>
                       </dl>
                     </div>

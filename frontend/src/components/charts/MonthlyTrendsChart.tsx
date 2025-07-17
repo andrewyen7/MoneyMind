@@ -33,9 +33,22 @@ interface MonthlyTrendsChartProps {
 }
 
 const MonthlyTrendsChart: React.FC<MonthlyTrendsChartProps> = ({ 
-  data, 
+  data: rawData, 
   title = "Monthly Income vs Expenses" 
 }) => {
+  // Log the raw data for debugging
+  console.log('Raw monthly trends data:', rawData);
+  
+  // Filter out any invalid data entries and ensure values are numbers
+  const data = rawData.map(item => ({
+    month: item.month,
+    income: Number(item.income) || 0,
+    expenses: Number(item.expenses) || 0,
+    net: Number(item.net) || 0
+  }));
+  
+  // Log the processed data for debugging
+  console.log('Processed monthly trends data:', data);
   const chartData = {
     labels: data.map(item => item.month),
     datasets: [

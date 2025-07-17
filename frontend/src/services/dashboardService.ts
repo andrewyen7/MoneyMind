@@ -1,4 +1,7 @@
 import api from '../utils/api';
+import axios from 'axios';
+
+const API_BASE_URL = 'https://moneymind-g1po.onrender.com/api';
 
 export interface DashboardData {
   transactions: any[];
@@ -8,6 +11,8 @@ export interface DashboardData {
     netIncome: number;
   };
   budgets: any[];
+  categorySpending: any[];
+  monthlySummary: any[];
   lastUpdate: number;
 }
 
@@ -16,14 +21,40 @@ export interface UpdateCheckResult {
   lastUpdate: number;
 }
 
+// Direct API implementation to bypass any issues
+const directDashboardApi = {
+  /**
+   * Get dashboard data directly
+   */
+  getDashboardData: async (): Promise<DashboardData> => {
+    try {
+      console.log('Fetching dashboard data directly from API');
+      const response = await axios({
+        method: 'get',
+        url: `${API_BASE_URL}/dashboard/data`,
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('Dashboard data received:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error fetching dashboard data:', error);
+      throw new Error(error.response?.data?.message || 'Failed to fetch dashboard data');
+    }
+  }
+};
+
 const dashboardService = {
   /**
    * Get dashboard data
    */
   getDashboardData: async (): Promise<DashboardData> => {
     try {
-      const response = await api.get('/dashboard/data');
-      return response.data;
+      // Use direct API call to avoid any issues
+      return directDashboardApi.getDashboardData();
     } catch (error) {
       throw error;
     }
