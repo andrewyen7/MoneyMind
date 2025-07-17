@@ -13,19 +13,26 @@ const api = axios.create({
 
 // Fix for budgets1 typo
 const originalGet = api.get;
-api.get = function(url, ...args) {
+api.get = function<T = any, R = AxiosResponse<T>, D = any>(
+  url: string,
+  config?: any
+): Promise<R> {
   if (url && url.includes('budgets1')) {
     url = url.replace('budgets1', 'budgets');
   }
-  return originalGet.call(this, url, ...args);
+  return originalGet.call(this, url, config);
 };
 
 const originalPost = api.post;
-api.post = function(url, ...args) {
+api.post = function<T = any, R = AxiosResponse<T>, D = any>(
+  url: string,
+  data?: D,
+  config?: any
+): Promise<R> {
   if (url && url.includes('budgets1')) {
     url = url.replace('budgets1', 'budgets');
   }
-  return originalPost.call(this, url, ...args);
+  return originalPost.call(this, url, data, config);
 };
 
 // Override specific endpoints that have issues
