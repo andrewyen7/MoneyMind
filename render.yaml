@@ -25,4 +25,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        value: https://moneymind-g1po.onrender.com/api
+        value: https://moneymind-backend-qr7v.onrender.com/api

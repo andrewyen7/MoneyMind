@@ -89,7 +89,7 @@ class BudgetService {
       // Use axios directly with the correct URL to bypass any typo
       const response = await axios({
         method: 'post',
-        url: 'https://moneymind-g1po.onrender.com/api/budgets',
+        url: 'https://moneymind-backend-qr7v.onrender.com/api/budgets',
         data: budgetData,
         withCredentials: true,
         headers: {

@@ -1,11 +1,9 @@
 import api from '../utils/api';
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://moneymind-g1po.onrender.com/api' 
-  : 'http://localhost:3000/api';
-
-export interface DashboardData {
+const API_BASE_URL = process.env.NODE_ENV === 'production'
+  ? 'https://moneymind-backend-qr7v.onrender.com/api' 
+  : 'http://localhost:3000/api';export interface DashboardData {
   transactions: any[];
   stats: {
     income: { total: number; count: number; avgAmount: number };
