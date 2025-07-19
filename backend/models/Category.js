@@ -47,6 +47,8 @@ const categorySchema = new mongoose.Schema({
 categorySchema.index({ userId: 1, type: 1 });
 categorySchema.index({ isDefault: 1, type: 1 });
 
+// This was a duplicate method - removed to avoid conflicts
+
 // Static method to get default categories
 categorySchema.statics.getDefaultCategories = function() {
   return [
@@ -56,7 +58,7 @@ categorySchema.statics.getDefaultCategories = function() {
     { name: 'Investment', type: 'income', icon: '📈', color: '#047857', isDefault: true },
     { name: 'Gift', type: 'income', icon: '🎁', color: '#065F46', isDefault: true },
     { name: 'Other Income', type: 'income', icon: '💰', color: '#064E3B', isDefault: true },
-    
+
     // Expense categories
     { name: 'Food & Dining', type: 'expense', icon: '🍽️', color: '#EF4444', isDefault: true },
     { name: 'Transportation', type: 'expense', icon: '🚗', color: '#F97316', isDefault: true },

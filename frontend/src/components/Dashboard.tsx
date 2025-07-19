@@ -3,6 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import Navigation from './shared/Navigation';
 import Header from './shared/Header';
 import dashboardService from '../services/dashboardService';
+import axios from 'axios';
+import { API_CONFIG } from '../config';
 import { Pie, Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -25,12 +27,22 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
-    dashboardService.getDashboardData()
-      .then(data => {
-        setDashboard(data);
+    
+    // Use direct axios call with hardcoded localhost URL
+    axios.get('http://localhost:3000/api/dashboard/data', {
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache'
+      }
+    })
+      .then(response => {
+        console.log('Dashboard data loaded:', response.data);
+        setDashboard(response.data);
         setError(null);
       })
       .catch(e => {
+        console.error('Dashboard data error:', e);
         setError('Failed to load dashboard data');
       })
       .finally(() => setLoading(false));

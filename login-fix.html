@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyMind Login Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #3b82f6;
+        }
+        .card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        pre {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 4px;
+            overflow: auto;
+        }
+        .success {
+            color: #10b981;
+            font-weight: bold;
+        }
+        .error {
+            color: #ef4444;
+            font-weight: bold;
+        }
+        .steps {
+            margin-top: 20px;
+            padding-left: 20px;
+        }
+        .steps li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>MoneyMind Login Fix</h1>
+    
+    <div class="card">
+        <h2>Step 1: Test Backend Connection</h2>
+        <p>First, let's check if your backend server is running and accessible:</p>
+        <button id="testBackend">Test Backend</button>
+        <div id="backendResult"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Step 2: Login with Test User</h2>
+        <p>This will authenticate with your local backend server:</p>
+        <button id="loginButton">Login as Test User</button>
+        <div id="loginResult"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Step 3: Check Authentication</h2>
+        <p>Verify that you're properly authenticated:</p>
+        <button id="checkAuthButton">Check Authentication</button>
+        <div id="authResult"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Step 4: Go to Dashboard</h2>
+        <p>Once authenticated, you can go to your dashboard:</p>
+        <button id="dashboardButton">Go to Dashboard</button>
+    </div>
+    
+    <div class="card">
+        <h2>Troubleshooting</h2>
+        <ol class="steps">
+            <li>Make sure your backend server is running on port 3000</li>
+            <li>Check that MongoDB is running and accessible</li>
+            <li>Try restarting your browser to clear any cached sessions</li>
+            <li>If you're still having issues, try running the test-api.js script in the backend folder</li>
+        </ol>
+    </div>
+    
+    <script>
+        // Helper function to make API requests
+        async function apiRequest(endpoint, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method,
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+                
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(`http://localhost:3000/api${endpoint}`, options);
+                return await response.json();
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+        
+        // Display result
+        function showResult(elementId, result, isError = false) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<pre class="${isError ? 'error' : 'success'}">${JSON.stringify(result, null, 2)}</pre>`;
+        }
+        
+        // Test backend connection
+        document.getElementById('testBackend').addEventListener('click', async () => {
+            try {
+                const result = await apiRequest('/health');
+                showResult('backendResult', result);
+            } catch (error) {
+                showResult('backendResult', { error: error.message }, true);
+            }
+        });
+        
+        // Login with test user
+        document.getElementById('loginButton').addEventListener('click', async () => {
+            try {
+                const result = await apiRequest('/auth/login', 'POST', {
+                    email: 'test@example.com',
+                    password: 'password123'
+                });
+                
+                if (result.success) {
+                    showResult('loginResult', result);
+                } else {
+                    showResult('loginResult', result, true);
+                }
+            } catch (error) {
+                showResult('loginResult', { error: error.message }, true);
+            }
+        });
+        
+        // Check authentication
+        document.getElementById('checkAuthButton').addEventListener('click', async () => {
+            try {
+                const result = await apiRequest('/auth/check');
+                showResult('authResult', result);
+            } catch (error) {
+                showResult('authResult', { error: error.message }, true);
+            }
+        });
+        
+        // Go to dashboard
+        document.getElementById('dashboardButton').addEventListener('click', () => {
+            window.location.href = 'http://localhost:5173/dashboard';
+        });
+    </script>
+</body>
+</html>

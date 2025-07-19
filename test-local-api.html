@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Local API Connection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            background-color: #3B82F6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2563EB;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Local API Connection</h1>
+    <p>This page tests the connection to your local MoneyMind API server.</p>
+    
+    <div>
+        <button id="testHealth">Test API Health</button>
+        <button id="testAuth">Test Authentication</button>
+        <button id="testBudgets">Test Budgets API</button>
+        <button id="testDashboard">Test Dashboard API</button>
+    </div>
+    
+    <h2>Results:</h2>
+    <pre id="results">Click a button to test the API connection...</pre>
+    
+    <script>
+        // API base URL
+        const API_BASE_URL = 'http://localhost:3000/api';
+        
+        // Function to display results
+        function displayResult(title, data, isError = false) {
+            const resultsElement = document.getElementById('results');
+            resultsElement.innerHTML = `<span class="${isError ? 'error' : 'success'}">${title}</span>\n\n${JSON.stringify(data, null, 2)}`;
+        }
+        
+        // Test API health
+        document.getElementById('testHealth').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`, {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                displayResult('✅ API Health Check Successful', data);
+            } catch (error) {
+                displayResult('❌ API Health Check Failed', error, true);
+            }
+        });
+        
+        // Test authentication
+        document.getElementById('testAuth').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/check`, {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                displayResult('✅ Authentication Check Successful', data);
+            } catch (error) {
+                displayResult('❌ Authentication Check Failed', error, true);
+            }
+        });
+        
+        // Test budgets API
+        document.getElementById('testBudgets').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/budgets?period=monthly`, {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                displayResult('✅ Budgets API Check Successful', data);
+            } catch (error) {
+                displayResult('❌ Budgets API Check Failed', error, true);
+            }
+        });
+        
+        // Test dashboard API
+        document.getElementById('testDashboard').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/dashboard/data`, {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                displayResult('✅ Dashboard API Check Successful', data);
+            } catch (error) {
+                displayResult('❌ Dashboard API Check Failed', error, true);
+            }
+        });
+    </script>
+</body>
+</html>

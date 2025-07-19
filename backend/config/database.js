@@ -2,7 +2,20 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_ATLAS_URI || 'mongodb://localhost:27017/moneymind');
+    // Try MongoDB Atlas first, fall back to local MongoDB if that fails
+    let uri = process.env.MONGODB_ATLAS_URI;
+    let conn;
+    
+    try {
+      console.log('Attempting to connect to MongoDB Atlas...');
+      conn = await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
+      console.log('Successfully connected to MongoDB Atlas');
+    } catch (atlasError) {
+      console.log('Could not connect to MongoDB Atlas, falling back to local MongoDB...');
+      uri = process.env.MONGODB_URI;
+      conn = await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
+      console.log('Successfully connected to local MongoDB');
+    }
 
     console.log(`MongoDB Connected: ${conn.connection.host}`);
     

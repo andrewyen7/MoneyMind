@@ -5,7 +5,6 @@ import Header from './shared/Header';
 import BudgetForm from './BudgetForm';
 import BudgetCard from './BudgetCard';
 import { Budget, BudgetFormData, BudgetSummary } from '../services/budgetService';
-import { directApi } from '../utils/directApi';
 
 import { formatCurrency } from '../utils/formatters';
 
@@ -26,13 +25,34 @@ const BudgetsPage: React.FC = () => {
       setIsLoading(true);
       setError(null);
       
-      const [budgetsData, summaryData] = await Promise.all([
-        directApi.getBudgets({ period: periodFilter }),
-        directApi.getBudgetSummary(periodFilter)
-      ]);
+      // Use a simple JSONP approach to avoid CORS issues
+      const script = document.createElement('script');
+      script.src = `http://localhost:3000/api/budgets?period=${periodFilter}&callback=handleBudgetsResponse`;
+      document.body.appendChild(script);
       
-      setBudgets(budgetsData);
-      setSummary(summaryData);
+      // Create a mock response for now
+      const mockBudgetsData = { budgets: [] };
+      const mockSummaryData = { 
+        summary: {
+          totalBudgeted: 0,
+          totalSpent: 0,
+          totalRemaining: 0,
+          budgetCount: 0,
+          goodCount: 0,
+          warningCount: 0,
+          overBudgetCount: 0
+        }
+      };
+
+      // Parse JSON responses
+      const budgetsData = await budgetsResponse.json();
+      const summaryData = await summaryResponse.json();
+      
+      console.log('Budgets response:', budgetsData);
+      console.log('Summary response:', summaryData);
+      
+      setBudgets(budgetsData.budgets || []);
+      setSummary(summaryData.summary || null);
     } catch (error: any) {
       console.error('Error loading budget data:', error);
       setError(error.message);
@@ -50,9 +70,14 @@ const BudgetsPage: React.FC = () => {
       setIsSubmitting(true);
       console.log('Creating budget with data:', data);
       
-      // Use direct API call with the correct URL (without the typo)
-      const response = await directApi.createBudget(data);
-      console.log('Budget created successfully:', response);
+      // Use direct axios call with hardcoded localhost URL
+      const response = await axios.post('http://localhost:3000/api/budgets', data, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log('Budget created successfully:', response.data);
       
       setShowForm(false);
       await loadData();
@@ -71,8 +96,13 @@ const BudgetsPage: React.FC = () => {
       setIsSubmitting(true);
       console.log('Updating budget with data:', data);
       
-      // Use direct API call to update budget
-      await directApi.updateBudget(editingBudget._id, data);
+      // Use direct axios call with hardcoded localhost URL
+      await axios.put(`http://localhost:3000/api/budgets/${editingBudget._id}`, data, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       console.log('Budget updated successfully');
       
       setEditingBudget(null);
@@ -98,7 +128,10 @@ const BudgetsPage: React.FC = () => {
 
     try {
       console.log('Deleting budget with ID:', id);
-      await directApi.deleteBudget(id);
+      // Use direct axios call with hardcoded localhost URL
+      await axios.delete(`http://localhost:3000/api/budgets/${id}`, {
+        withCredentials: true
+      });
       console.log('Budget deleted successfully');
       await loadData();
     } catch (error: any) {

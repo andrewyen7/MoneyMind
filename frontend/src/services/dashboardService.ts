@@ -1,7 +1,7 @@
 import api from '../utils/api';
 import axios from 'axios';
 
-const API_BASE_URL = 'https://moneymind-g1po.onrender.com/api';
+const API_BASE_URL = 'http://localhost:3000/api';
 
 export interface DashboardData {
   transactions: any[];
@@ -29,12 +29,17 @@ const directDashboardApi = {
   getDashboardData: async (): Promise<DashboardData> => {
     try {
       console.log('Fetching dashboard data directly from API');
+      // Force the URL to be localhost:3000 to avoid any cached URLs
       const response = await axios({
         method: 'get',
-        url: `${API_BASE_URL}/dashboard/data`,
+        url: 'http://localhost:3000/api/dashboard/data',
         withCredentials: true,
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          // Add cache-busting headers
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         }
       });
       

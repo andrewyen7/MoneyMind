@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Navigation from './shared/Navigation';
 import LoadingSpinner, { StatCardSkeleton, ChartSkeleton } from './shared/LoadingSpinner';
@@ -9,7 +10,7 @@ import MonthlyTrendsChart from './charts/MonthlyTrendsChart';
 import BudgetProgressChart from './charts/BudgetProgressChart';
 import transactionService, { Transaction, TransactionStats } from '../services/transactionService';
 import { Budget, BudgetSummary } from '../services/budgetService';
-import { directApi } from '../utils/directApi';
+import axios from 'axios';
 
 const EnhancedDashboard: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -28,21 +29,45 @@ const EnhancedDashboard: React.FC = () => {
       setIsLoading(true);
       setError(null);
       
+      // Use direct axios calls with hardcoded localhost URL to avoid any cached URLs
       const [
-        recentTransactionsData,
-        allExpenseTransactionsData,
-        allIncomeTransactionsData,
-        statsData,
-        budgetsData,
-        budgetSummaryData
+        recentTransactionsResponse,
+        allExpenseTransactionsResponse,
+        allIncomeTransactionsResponse,
+        statsResponse,
+        budgetsResponse,
+        budgetSummaryResponse
       ] = await Promise.all([
-        transactionService.getTransactions({ limit: 5, sortBy: 'date', sortOrder: 'desc' }),
-        transactionService.getTransactions({ type: 'expense', limit: 1000, sortBy: 'date', sortOrder: 'desc' }),
-        transactionService.getTransactions({ type: 'income', limit: 1000, sortBy: 'date', sortOrder: 'desc' }),
-        transactionService.getTransactionStats(),
-        directApi.getBudgets({ period: 'monthly' }),
-        directApi.getBudgetSummary('monthly')
+        axios.get('http://localhost:3000/api/transactions', { 
+          params: { limit: 5, sortBy: 'date', sortOrder: 'desc' },
+          withCredentials: true 
+        }),
+        axios.get('http://localhost:3000/api/transactions', { 
+          params: { type: 'expense', limit: 1000, sortBy: 'date', sortOrder: 'desc' },
+          withCredentials: true 
+        }),
+        axios.get('http://localhost:3000/api/transactions', { 
+          params: { type: 'income', limit: 1000, sortBy: 'date', sortOrder: 'desc' },
+          withCredentials: true 
+        }),
+        axios.get('http://localhost:3000/api/transactions/stats', { withCredentials: true }),
+        axios.get('http://localhost:3000/api/budgets', { 
+          params: { period: 'monthly' },
+          withCredentials: true 
+        }),
+        axios.get('http://localhost:3000/api/budgets/summary', { 
+          params: { period: 'monthly' },
+          withCredentials: true 
+        })
       ]);
+      
+      // Extract data from responses
+      const recentTransactionsData = { transactions: recentTransactionsResponse.data.transactions || [] };
+      const allExpenseTransactionsData = { transactions: allExpenseTransactionsResponse.data.transactions || [] };
+      const allIncomeTransactionsData = { transactions: allIncomeTransactionsResponse.data.transactions || [] };
+      const statsData = statsResponse.data.stats;
+      const budgetsData = budgetsResponse.data.budgets || [];
+      const budgetSummaryData = budgetSummaryResponse.data.summary;
       
       setTransactions(recentTransactionsData.transactions);
       setAllExpenseTransactions(allExpenseTransactionsData.transactions);
@@ -64,9 +89,11 @@ const EnhancedDashboard: React.FC = () => {
     }
   };
 
+  const location = useLocation();
   useEffect(() => {
     loadDashboardData();
-  }, []);
+    // eslint-disable-next-line
+  }, [location.pathname]);
 
   // Prepare data for spending pie chart
   const getSpendingByCategory = () => {
@@ -106,14 +133,13 @@ const EnhancedDashboard: React.FC = () => {
     // Add all months of the current year
     for (let month = 0; month < 12; month++) {
       const monthKey = `${currentYear}-${String(month + 1).padStart(2, '0')}`;
-      const monthName = monthNames[month];
       monthlyData[monthKey] = { income: 0, expenses: 0 };
     }
     
     console.log('Processing transactions for monthly trends...');
     
     // Get all transactions (both income and expense)
-    const allTransactions = [...transactions, ...allExpenseTransactions, ...allIncomeTransactions];
+    const allTransactions = [...allExpenseTransactions, ...allIncomeTransactions];
     
     // Remove duplicates by ID
     const uniqueTransactions = Array.from(
@@ -121,7 +147,6 @@ const EnhancedDashboard: React.FC = () => {
     );
     
     console.log(`Total unique transactions for monthly trends: ${uniqueTransactions.length}`);
-    console.log(`Total transactions to process: ${allTransactions.length}`);
     
     // Process all transactions to get real monthly data
     uniqueTransactions.forEach(transaction => {
@@ -130,8 +155,9 @@ const EnhancedDashboard: React.FC = () => {
         return;
       }
       
-      const date = new Date(transaction.date);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      // Parse the date string to get year and month
+      const [year, month] = transaction.date.split('T')[0].split('-');
+      const monthKey = `${year}-${month}`;
       
       if (monthlyData[monthKey]) {
         if (transaction.type === 'income') {
@@ -142,7 +168,11 @@ const EnhancedDashboard: React.FC = () => {
           monthlyData[monthKey].expenses += Number(transaction.amount) || 0;
         }
       } else {
-        console.log(`Month key not found: ${monthKey} for transaction dated ${transaction.date}`);
+        console.log(`Creating new month data for ${monthKey}`);
+        monthlyData[monthKey] = {
+          income: transaction.type === 'income' ? Number(transaction.amount) || 0 : 0,
+          expenses: transaction.type === 'expense' ? Number(transaction.amount) || 0 : 0
+        };
       }
     });
     

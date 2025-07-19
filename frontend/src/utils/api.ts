@@ -3,7 +3,7 @@ import { ErrorHandler } from './errorHandler';
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: 'https://moneymind-g1po.onrender.com/api',
+  baseURL: 'http://localhost:3000/api', // Always use localhost in development
   withCredentials: true, // Important for session cookies
   timeout: 10000, // 10 second timeout
   headers: {
@@ -45,6 +45,15 @@ api.interceptors.request.use(
     if (config.url && config.url.includes('budgets1')) {
       config.url = config.url.replace('budgets1', 'budgets');
     }
+    
+    // Remove cache-control headers that cause CORS issues
+    if (config.headers) {
+      delete config.headers['Cache-Control'];
+      delete config.headers['cache-control'];
+      delete config.headers['Pragma'];
+      delete config.headers['Expires'];
+    }
+    
     return config;
   },
   (error) => {

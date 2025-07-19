@@ -278,46 +278,137 @@ budgetSchema.statics.getBudgetSummary = async function(userId, period = 'monthly
 budgetSchema.methods.checkOverlap = async function() {
   const Budget = this.constructor;
   
-  const overlappingBudgets = await Budget.find({
-    userId: this.userId,
-    category: this.category,
-    isActive: true,
-    _id: { $ne: this._id },
-    $or: [
-      {
-        startDate: { $lte: this.endDate },
-        endDate: { $gte: this.startDate }
-      }
-    ]
+  console.log('Starting budget overlap check with data:', {
+    period: this.period,
+    category: this.category.toString(),
+    startDate: this.startDate,
+    endDate: this.endDate,
+    userId: this.userId.toString()
   });
 
-  return overlappingBudgets.length > 0;
+  try {
+    const query = {
+      userId: this.userId,
+      category: this.category,
+      period: this.period,
+      isActive: true
+    };
+
+    if (this.period === 'yearly') {
+      query.startDate = {
+        $gte: new Date(this.startDate.getFullYear(), 0, 1),
+        $lte: new Date(this.startDate.getFullYear(), 11, 31)
+      };
+    } else {
+      query.$and = [
+        { startDate: { $lte: this.endDate } },
+        { endDate: { $gte: this.startDate } }
+      ];
+    }
+
+    if (this._id) {
+      query._id = { $ne: this._id };
+    }
+
+    const existingBudget = await Budget.findOne(query).exec();
+    
+    console.log('Overlap check result:', {
+      query,
+      hasOverlap: !!existingBudget,
+      existingBudgetId: existingBudget?._id
+    });
+
+    return !!existingBudget;
+  } catch (error) {
+    console.error('Error in checkOverlap:', error);
+    throw error;
+  }
 };
 
-// Pre-validate middleware to set end date
-budgetSchema.pre('validate', function(next) {
-  // Auto-set end date based on period if not provided
-  if (!this.endDate && this.startDate && this.period) {
-    if (this.period === 'monthly') {
-      const start = new Date(this.startDate);
-      // Get the last day of the same month
-      this.endDate = new Date(start.getFullYear(), start.getMonth() + 1, 0);
-    } else if (this.period === 'yearly') {
-      const start = new Date(this.startDate);
-      this.endDate = new Date(start.getFullYear(), 11, 31);
-    }
-  }
+// Pre-validate middleware to set end date and check overlaps
+budgetSchema.pre('validate', async function(next) {
+  try {
+    console.log('Pre-validate budget:', {
+      id: this._id,
+      period: this.period,
+      startDate: this.startDate,
+      category: this.category?.toString()
+    });
 
-  next();
+    // 設置結束日期
+    if (!this.endDate && this.startDate && this.period) {
+      const start = new Date(this.startDate);
+      
+      if (this.period === 'monthly') {
+        this.endDate = new Date(start.getFullYear(), start.getMonth() + 1, 0);
+      } else if (this.period === 'yearly') {
+        this.endDate = new Date(start.getFullYear(), 11, 31);
+      }
+      
+      console.log('Set end date:', {
+        startDate: this.startDate,
+        endDate: this.endDate,
+        period: this.period
+      });
+    }
+
+    // 檢查重疊
+    if (this.isNew || this.isModified('startDate') || this.isModified('period') || this.isModified('category')) {
+      const Budget = this.constructor;
+      
+      const query = {
+        userId: this.userId,
+        category: this.category,
+        isActive: true,
+        period: this.period
+      };
+
+      if (this._id) {
+        query._id = { $ne: this._id };
+      }
+
+      if (this.period === 'yearly') {
+        const year = new Date(this.startDate).getFullYear();
+        query.startDate = {
+          $gte: new Date(year, 0, 1),
+          $lte: new Date(year, 11, 31)
+        };
+      } else {
+        query.$and = [
+          { startDate: { $lte: this.endDate } },
+          { endDate: { $gte: this.startDate } }
+        ];
+      }
+
+      const existingBudget = await Budget.findOne(query);
+      
+      console.log('Overlap check result:', {
+        query,
+        hasOverlap: !!existingBudget,
+        existingBudgetId: existingBudget?._id
+      });
+
+      if (existingBudget) {
+        throw new Error('A budget for this category already exists in the specified time period');
+      }
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 // Pre-save middleware to round amount
 budgetSchema.pre('save', function(next) {
-  if (this.isModified('amount')) {
-    this.amount = Math.round(this.amount * 100) / 100;
+  try {
+    if (this.isModified('amount')) {
+      this.amount = Math.round(this.amount * 100) / 100;
+    }
+    next();
+  } catch (error) {
+    next(error);
   }
-
-  next();
 });
 
 const Budget = mongoose.model('Budget', budgetSchema);

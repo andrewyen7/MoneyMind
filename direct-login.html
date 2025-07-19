@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct Login</title>
+    <style>
+        body { font-family: Arial; max-width: 500px; margin: 0 auto; padding: 20px; }
+        button { padding: 10px; margin: 5px; cursor: pointer; }
+        pre { background: #f0f0f0; padding: 10px; overflow: auto; }
+    </style>
+</head>
+<body>
+    <h1>MoneyMind Direct Login</h1>
+    <p>This page will help you log in directly to your local backend.</p>
+    
+    <div>
+        <button id="loginBtn">Login with Test User</button>
+        <button id="checkAuthBtn">Check Auth Status</button>
+        <button id="dashboardBtn">Go to Dashboard</button>
+    </div>
+    
+    <h3>Result:</h3>
+    <pre id="result">Click a button to start...</pre>
+    
+    <script>
+        // Simple function to make API requests
+        async function apiRequest(url, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method,
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+                
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(url, options);
+                return await response.json();
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+        
+        // Display result
+        function showResult(title, data) {
+            document.getElementById('result').textContent = 
+                `${title}\n\n${JSON.stringify(data, null, 2)}`;
+        }
+        
+        // Login with test user
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const result = await apiRequest(
+                'http://localhost:3000/api/auth/login', 
+                'POST', 
+                { email: 'test@example.com', password: 'password123' }
+            );
+            
+            showResult('Login Result:', result);
+            
+            if (result.success) {
+                document.getElementById('result').innerHTML += '\n\nLogin successful! You can now go to the dashboard.';
+            }
+        });
+        
+        // Check authentication status
+        document.getElementById('checkAuthBtn').addEventListener('click', async () => {
+            const result = await apiRequest('http://localhost:3000/api/auth/check');
+            showResult('Auth Status:', result);
+        });
+        
+        // Go to dashboard
+        document.getElementById('dashboardBtn').addEventListener('click', () => {
+            window.location.href = 'http://localhost:5173/dashboard';
+        });
+    </script>
+</body>
+</html>
