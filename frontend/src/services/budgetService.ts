@@ -1,8 +1,6 @@
 import api from '../utils/api';
 import axios from 'axios';
-import { Category } from './tr      const response = await axios({
-        method: 'post',
-        url: 'https://moneymind-g1po.onrender.com/api/budgets',
+import { Category } from './transactionService';
         data: budgetData,
         withCredentials: true,
         headers: {
@@ -97,7 +95,7 @@ class BudgetService {
       // Use axios directly with the correct URL to bypass any typo
       const response = await axios({
         method: 'post',
-        url: 'https://moneymind-backend.onrender.com/api/budgets',
+        url: 'https://moneymind-g1po.onrender.com/api/budgets',
         data: budgetData,
         withCredentials: true,
         headers: {
