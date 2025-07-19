@@ -5,8 +5,8 @@ import Header from './shared/Header';
 import BudgetForm from './BudgetForm';
 import BudgetCard from './BudgetCard';
 import { Budget, BudgetFormData, BudgetSummary } from '../services/budgetService';
-
 import { formatCurrency } from '../utils/formatters';
+import axios from 'axios';
 
 const BudgetsPage: React.FC = () => {
   const { state } = useAuth();
@@ -25,25 +25,15 @@ const BudgetsPage: React.FC = () => {
       setIsLoading(true);
       setError(null);
       
-      // Use a simple JSONP approach to avoid CORS issues
-      const script = document.createElement('script');
-      script.src = `http://localhost:3000/api/budgets?period=${periodFilter}&callback=handleBudgetsResponse`;
-      document.body.appendChild(script);
+      // Use fetch API with production URLs
+      const budgetsResponse = await fetch(`/api/budgets?period=${periodFilter}`, {
+        credentials: 'include'
+      });
       
-      // Create a mock response for now
-      const mockBudgetsData = { budgets: [] };
-      const mockSummaryData = { 
-        summary: {
-          totalBudgeted: 0,
-          totalSpent: 0,
-          totalRemaining: 0,
-          budgetCount: 0,
-          goodCount: 0,
-          warningCount: 0,
-          overBudgetCount: 0
-        }
-      };
-
+      const summaryResponse = await fetch(`/api/budgets/summary?period=${periodFilter}`, {
+        credentials: 'include'
+      });
+      
       // Parse JSON responses
       const budgetsData = await budgetsResponse.json();
       const summaryData = await summaryResponse.json();
@@ -55,7 +45,7 @@ const BudgetsPage: React.FC = () => {
       setSummary(summaryData.summary || null);
     } catch (error: any) {
       console.error('Error loading budget data:', error);
-      setError(error.message);
+      setError(error.message || 'Failed to load budget data');
     } finally {
       setIsLoading(false);
     }
@@ -70,14 +60,15 @@ const BudgetsPage: React.FC = () => {
       setIsSubmitting(true);
       console.log('Creating budget with data:', data);
       
-      // Use direct axios call with hardcoded localhost URL
-      const response = await axios.post('http://localhost:3000/api/budgets', data, {
+      const response = await axios.post('/api/budgets', data, {
         withCredentials: true,
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      console.log('Budget created successfully:', response.data);
+      
+      const result = await response.json();
+      console.log('Budget created successfully:', result);
       
       setShowForm(false);
       await loadData();
@@ -96,14 +87,15 @@ const BudgetsPage: React.FC = () => {
       setIsSubmitting(true);
       console.log('Updating budget with data:', data);
       
-      // Use direct axios call with hardcoded localhost URL
-      await axios.put(`http://localhost:3000/api/budgets/${editingBudget._id}`, data, {
+      const response = await axios.put(`/api/budgets/${editingBudget._id}`, data, {
         withCredentials: true,
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      console.log('Budget updated successfully');
+      
+      const result = response.data;
+      console.log('Budget updated successfully:', result);
       
       setEditingBudget(null);
       setShowForm(false);
@@ -128,15 +120,18 @@ const BudgetsPage: React.FC = () => {
 
     try {
       console.log('Deleting budget with ID:', id);
-      // Use direct axios call with hardcoded localhost URL
-      await axios.delete(`http://localhost:3000/api/budgets/${id}`, {
+      
+      const response = await axios.delete(`/api/budgets/${id}`, {
         withCredentials: true
       });
-      console.log('Budget deleted successfully');
+      
+      const result = response.data;
+      console.log('Budget deleted successfully:', result);
+      
       await loadData();
     } catch (error: any) {
       console.error('Budget deletion failed:', error);
-      setError(error.message);
+      setError(error.message || 'Failed to delete budget');
     }
   };
 
