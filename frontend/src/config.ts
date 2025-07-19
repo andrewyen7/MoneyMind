@@ -4,8 +4,10 @@
 
 // API configuration
 export const API_CONFIG = {
-  // Use relative path for production, localhost for development
-  BASE_URL: process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:3000/api',
+  // Use backend service URL for production, localhost for development
+  BASE_URL: process.env.NODE_ENV === 'production' 
+    ? 'https://moneymind-g1po.onrender.com/api' 
+    : 'http://localhost:3000/api',
   // Request configuration
   REQUEST_CONFIG: {
     withCredentials: true,

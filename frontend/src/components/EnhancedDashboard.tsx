@@ -13,7 +13,9 @@ import { Budget, BudgetSummary } from '../services/budgetService';
 import axios from 'axios';
 
 // Environment-aware API URL
-const API_BASE_URL = process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:3000/api';
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://moneymind-g1po.onrender.com/api' 
+  : 'http://localhost:3000/api';
 
 const EnhancedDashboard: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
