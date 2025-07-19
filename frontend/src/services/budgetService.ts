@@ -1,12 +1,6 @@
 import api from '../utils/api';
 import axios from 'axios';
 import { Category } from './transactionService';
-        data: budgetData,
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });Service';
 
 export interface Budget {
   _id: string;
