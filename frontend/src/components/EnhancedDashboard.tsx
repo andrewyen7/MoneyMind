@@ -12,6 +12,9 @@ import transactionService, { Transaction, TransactionStats } from '../services/t
 import { Budget, BudgetSummary } from '../services/budgetService';
 import axios from 'axios';
 
+// Environment-aware API URL
+const API_BASE_URL = process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:3000/api';
+
 const EnhancedDashboard: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [allExpenseTransactions, setAllExpenseTransactions] = useState<Transaction[]>([]);
@@ -38,24 +41,24 @@ const EnhancedDashboard: React.FC = () => {
         budgetsResponse,
         budgetSummaryResponse
       ] = await Promise.all([
-        axios.get('http://localhost:3000/api/transactions', { 
+        axios.get(`${API_BASE_URL}/transactions`, { 
           params: { limit: 5, sortBy: 'date', sortOrder: 'desc' },
           withCredentials: true 
         }),
-        axios.get('http://localhost:3000/api/transactions', { 
+        axios.get(`${API_BASE_URL}/transactions`, { 
           params: { type: 'expense', limit: 1000, sortBy: 'date', sortOrder: 'desc' },
           withCredentials: true 
         }),
-        axios.get('http://localhost:3000/api/transactions', { 
+        axios.get(`${API_BASE_URL}/transactions`, { 
           params: { type: 'income', limit: 1000, sortBy: 'date', sortOrder: 'desc' },
           withCredentials: true 
         }),
-        axios.get('http://localhost:3000/api/transactions/stats', { withCredentials: true }),
-        axios.get('http://localhost:3000/api/budgets', { 
+        axios.get(`${API_BASE_URL}/transactions/stats`, { withCredentials: true }),
+        axios.get(`${API_BASE_URL}/budgets`, { 
           params: { period: 'monthly' },
           withCredentials: true 
         }),
-        axios.get('http://localhost:3000/api/budgets/summary', { 
+        axios.get(`${API_BASE_URL}/budgets/summary`, { 
           params: { period: 'monthly' },
           withCredentials: true 
         })

@@ -4,8 +4,8 @@
 
 // API configuration
 export const API_CONFIG = {
-  // Always use localhost for development
-  BASE_URL: 'http://localhost:3000/api',
+  // Use relative path for production, localhost for development
+  BASE_URL: process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:3000/api',
   // Request configuration
   REQUEST_CONFIG: {
     withCredentials: true,

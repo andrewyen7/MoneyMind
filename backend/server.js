@@ -22,9 +22,17 @@ const PORT = process.env.PORT || 5000;
 // Trust proxy for Render
 app.set('trust proxy', 1);
 
-// IMPORTANT: Completely disable CORS checks for development
+// CORS configuration for both development and production
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://moneymind-1.onrender.com'
+];
+
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', '*');
   res.setHeader('Access-Control-Allow-Credentials', 'true');

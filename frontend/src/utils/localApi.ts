@@ -5,8 +5,8 @@
 import axios from 'axios';
 import { BudgetFormData, BudgetFilters } from '../services/budgetService';
 
-// Force the URL to be localhost:3000
-const API_BASE_URL = 'http://localhost:3000/api';
+// Use environment-aware API URL
+const API_BASE_URL = process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:3000/api';
 
 // Request config with cache busting
 const requestConfig = {

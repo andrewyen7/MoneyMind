@@ -1,7 +1,7 @@
 import api from '../utils/api';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:3000/api';
 
 export interface DashboardData {
   transactions: any[];
@@ -29,10 +29,10 @@ const directDashboardApi = {
   getDashboardData: async (): Promise<DashboardData> => {
     try {
       console.log('Fetching dashboard data directly from API');
-      // Force the URL to be localhost:3000 to avoid any cached URLs
+      // Use environment-aware API URL
       const response = await axios({
         method: 'get',
-        url: 'http://localhost:3000/api/dashboard/data',
+        url: `${API_BASE_URL}/dashboard/data`,
         withCredentials: true,
         headers: {
           'Content-Type': 'application/json',

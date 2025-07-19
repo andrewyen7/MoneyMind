@@ -28,8 +28,8 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     setLoading(true);
     
-    // Use direct axios call with hardcoded localhost URL
-    axios.get('http://localhost:3000/api/dashboard/data', {
+    // Use API_CONFIG for environment-aware URL
+    axios.get(`${API_CONFIG.BASE_URL.replace('/api', '')}/api/dashboard/data`, {
       withCredentials: true,
       headers: {
         'Content-Type': 'application/json',
