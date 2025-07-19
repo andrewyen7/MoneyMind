@@ -24,21 +24,20 @@ const BudgetsPage: React.FC = () => {
       setIsLoading(true);
       setError(null);
       
-      // Use fetch API with production URLs
-      const budgetsResponse = await fetch(`/api/budgets?period=${periodFilter}`, {
+      // Fetch budgets
+      const budgetsRes = await fetch(`/api/budgets?period=${periodFilter}`, {
         credentials: 'include'
       });
+      const budgetsData = await budgetsRes.json();
       
-      const summaryResponse = await fetch(`/api/budgets/summary?period=${periodFilter}`, {
+      // Fetch summary
+      const summaryRes = await fetch(`/api/budgets/summary?period=${periodFilter}`, {
         credentials: 'include'
       });
+      const summaryData = await summaryRes.json();
       
-      // Parse JSON responses
-      const budgetsData = await budgetsResponse.json();
-      const summaryData = await summaryResponse.json();
-      
-      console.log('Budgets response:', budgetsData);
-      console.log('Summary response:', summaryData);
+      console.log('Budgets loaded:', budgetsData);
+      console.log('Summary loaded:', summaryData);
       
       setBudgets(budgetsData.budgets || []);
       setSummary(summaryData.summary || null);
@@ -59,14 +58,17 @@ const BudgetsPage: React.FC = () => {
       setIsSubmitting(true);
       console.log('Creating budget with data:', data);
       
-      const response = await axios.post('/api/budgets', data, {
-        withCredentials: true,
+      const response = await fetch('/api/budgets', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify(data),
+        credentials: 'include'
       });
       
-      console.log('Budget created successfully:', response.data);
+      const result = await response.json();
+      console.log('Budget created successfully:', result);
       
       setShowForm(false);
       await loadData();
@@ -85,14 +87,16 @@ const BudgetsPage: React.FC = () => {
       setIsSubmitting(true);
       console.log('Updating budget with data:', data);
       
-      const response = await axios.put(`/api/budgets/${editingBudget._id}`, data, {
-        withCredentials: true,
+      const response = await fetch(`/api/budgets/${editingBudget._id}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify(data),
+        credentials: 'include'
       });
       
-      const result = response.data;
+      const result = await response.json();
       console.log('Budget updated successfully:', result);
       
       setEditingBudget(null);
@@ -119,11 +123,12 @@ const BudgetsPage: React.FC = () => {
     try {
       console.log('Deleting budget with ID:', id);
       
-      const response = await axios.delete(`/api/budgets/${id}`, {
-        withCredentials: true
+      const response = await fetch(`/api/budgets/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
       });
       
-      const result = response.data;
+      const result = await response.json();
       console.log('Budget deleted successfully:', result);
       
       await loadData();
