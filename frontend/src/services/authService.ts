@@ -54,13 +54,21 @@ class AuthService {
   // Login user
   async login(loginData: LoginData): Promise<AuthResponse> {
     try {
+      console.log('AuthService: Attempting login to API');
       const response = await api.post('/auth/login', loginData);
+      console.log('AuthService: Login response:', response.data);
       return response.data;
     } catch (error: any) {
+      console.error('AuthService: Login error:', error);
       if (error.response?.data) {
+        console.log('AuthService: Error response data:', error.response.data);
         return error.response.data;
       }
-      throw new Error('Login failed');
+      console.error('AuthService: Network or other error:', error.message);
+      return {
+        success: false,
+        message: 'Network error: Unable to connect to server'
+      };
     }
   }
 

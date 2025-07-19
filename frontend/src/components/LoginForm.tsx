@@ -38,9 +38,22 @@ const LoginForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await login(formData);
-    if (success) {
-      navigate(from, { replace: true });
+    console.log('LoginForm: Starting login process');
+    console.log('LoginForm: Form data:', { email: formData.email, password: '***' });
+    
+    try {
+      const success = await login(formData);
+      console.log('LoginForm: Login result:', success);
+      
+      if (success) {
+        console.log('LoginForm: Login successful, navigating to:', from);
+        navigate(from, { replace: true });
+      } else {
+        console.log('LoginForm: Login failed');
+        // Error will be displayed from AuthContext
+      }
+    } catch (error) {
+      console.error('LoginForm: Login error:', error);
     }
   };
 

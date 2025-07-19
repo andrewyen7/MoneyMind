@@ -34,7 +34,7 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   
   if (req.method === 'OPTIONS') {
@@ -49,16 +49,16 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session configuration
+// Session configuration with environment-aware settings
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-secret-key',
-  resave: true,
-  saveUninitialized: true,
+  secret: process.env.JWT_SECRET || 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
   cookie: {
-    secure: false, // Set to false for local development
+    secure: process.env.NODE_ENV === 'production', // HTTPS in production, HTTP in development
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: 'lax'
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // 'none' for cross-origin in production
   }
 }));
 

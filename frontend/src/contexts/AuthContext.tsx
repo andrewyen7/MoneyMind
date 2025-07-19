@@ -108,18 +108,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Login function
   const login = async (loginData: LoginData): Promise<boolean> => {
+    console.log('AuthContext: Starting login process');
     dispatch({ type: 'AUTH_START' });
     try {
+      console.log('AuthContext: Calling authService.login');
       const response = await authService.login(loginData);
+      console.log('AuthContext: Login response:', response);
+      
       if (response.success && response.user) {
+        console.log('AuthContext: Login successful, dispatching AUTH_SUCCESS');
         dispatch({ type: 'AUTH_SUCCESS', payload: response.user });
         return true;
       } else {
-        dispatch({ type: 'AUTH_FAILURE', payload: response.message });
+        console.log('AuthContext: Login failed:', response.message);
+        dispatch({ type: 'AUTH_FAILURE', payload: response.message || 'Login failed' });
         return false;
       }
-    } catch (error) {
-      dispatch({ type: 'AUTH_FAILURE', payload: 'Login failed' });
+    } catch (error: any) {
+      console.error('AuthContext: Login error:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Login failed';
+      dispatch({ type: 'AUTH_FAILURE', payload: errorMessage });
       return false;
     }
   };
