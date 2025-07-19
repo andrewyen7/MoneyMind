@@ -1,6 +1,8 @@
 services:
   - type: web
-    name: moneymind-backend
+     envVars:
+      - key: VITE_API_URL
+        value: https://moneymind-g1po.onrender.com/apiname: moneymind-backend
     env: node
     buildCommand: cd backend && npm install
     startCommand: cd backend && npm start
@@ -25,4 +27,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        value: https://moneymind-backend-qr7v.onrender.com/api
+        value: https://moneymind-backend.onrender.com/api

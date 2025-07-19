@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, {const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://moneymind-g1po.onrender.com/api' 
+  : 'http://localhost:3000/api';eState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Navigation from './shared/Navigation';
@@ -14,7 +16,7 @@ import axios from 'axios';
 
 // Environment-aware API URL
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://moneymind-backend-qr7v.onrender.com/api' 
+  ? 'https://moneymind-backend.onrender.com/api' 
   : 'http://localhost:3000/api';
 
 const EnhancedDashboard: React.FC = () => {

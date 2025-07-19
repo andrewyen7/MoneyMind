@@ -1,10 +1,12 @@
-import axios, { AxiosError, AxiosResponse } from 'axios';
+impor  baseURL: process.env.NODE_ENV === 'production' 
+    ? 'https://moneymind-g1po.onrender.com/api' 
+    : 'http://localhost:3000/api',xios, { AxiosError, AxiosResponse } from 'axios';
 import { ErrorHandler } from './errorHandler';
 
 // Create axios instance with default config
 const api = axios.create({
   baseURL: process.env.NODE_ENV === 'production' 
-    ? 'https://moneymind-backend-qr7v.onrender.com/api' 
+    ? 'https://moneymind-backend.onrender.com/api' 
     : 'http://localhost:3000/api',
   withCredentials: true, // Important for session cookies
   timeout: 10000, // 10 second timeout
