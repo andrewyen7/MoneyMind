@@ -6,53 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MoneyMind - Personal Finance Tracker</title>
     
-    <!-- CRITICAL: API override script to force localhost connections -->
-    <script>
-      // EMERGENCY FIX: Override all API calls to use localhost instead of production
-      (function() {
-        console.log('EMERGENCY API REDIRECT ACTIVE');
-        
-        // Force global API URL to localhost
-        window.API_BASE_URL = 'http://localhost:3000/api';
-        
-        // Create a proxy for XMLHttpRequest
-        const originalXHROpen = XMLHttpRequest.prototype.open;
-        XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
-          // Check if the URL contains the production domain
-          if (typeof url === 'string' && url.includes('moneymind-g1po.onrender.com')) {
-            // Replace with localhost
-            url = url.replace('https://moneymind-g1po.onrender.com', 'http://localhost:3000');
-            console.log('XHR redirected to:', url);
-          }
-          return originalXHROpen.call(this, method, url, async, user, password);
-        };
-        
-        // Create a proxy for fetch
-        const originalFetch = window.fetch;
-        window.fetch = function(input, init) {
-          if (typeof input === 'string' && input.includes('moneymind-g1po.onrender.com')) {
-            // Replace with localhost
-            input = input.replace('https://moneymind-g1po.onrender.com', 'http://localhost:3000');
-            console.log('Fetch redirected to:', input);
-          }
-          return originalFetch.call(this, input, init);
-        };
-        
-        // Set a global variable to be used by axios
-        window.__FORCE_API_URL__ = 'http://localhost:3000/api';
-        
-        // Monitor for axios loading
-        const checkInterval = setInterval(function() {
-          if (window.axios) {
-            clearInterval(checkInterval);
-            console.log('Axios detected, overriding configuration');
-            window.axios.defaults.baseURL = 'http://localhost:3000/api';
-          }
-        }, 100);
-        
-        console.log('API REDIRECT ACTIVE: All calls to production will use localhost:3000');
-      })();
-    </script>
+    <!-- API override script removed for production. -->
   </head>
   <body>
     <div id="root"></div>
