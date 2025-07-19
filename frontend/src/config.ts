@@ -2,10 +2,12 @@
  * Application configuration
  */
 
-// API configuration
+// API configuration - detect production by hostname
+const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('onrender.com');
+
 export const API_CONFIG = {
   // Use backend service URL for production, localhost for development
-  BASE_URL: (import.meta.env.PROD || window.location.hostname.includes('render.com'))
+  BASE_URL: isProduction
     ? 'https://moneymind-g1po.onrender.com/api' 
     : 'http://localhost:3000/api',
   // Request configuration

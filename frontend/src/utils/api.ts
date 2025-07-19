@@ -2,8 +2,10 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import { ErrorHandler } from './errorHandler';
 
 // Create axios instance with default config
+const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('onrender.com');
+
 const api = axios.create({
-  baseURL: (import.meta.env.PROD || window.location.hostname.includes('render.com'))
+  baseURL: isProduction
     ? 'https://moneymind-g1po.onrender.com/api' 
     : 'http://localhost:3000/api',
   withCredentials: true, // Important for session cookies
