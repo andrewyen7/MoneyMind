@@ -3,7 +3,7 @@ import { ErrorHandler } from './errorHandler';
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: process.env.NODE_ENV === 'production' 
+  baseURL: (import.meta.env.PROD || window.location.hostname.includes('render.com'))
     ? 'https://moneymind-g1po.onrender.com/api' 
     : 'http://localhost:3000/api',
   withCredentials: true, // Important for session cookies

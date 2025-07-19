@@ -6,7 +6,7 @@ import axios from 'axios';
 import { BudgetFormData, BudgetFilters } from '../services/budgetService';
 
 // Use environment-aware API URL
-const API_BASE_URL = process.env.NODE_ENV === 'production'
+const API_BASE_URL = (import.meta.env.PROD || window.location.hostname.includes('render.com'))
   ? 'https://moneymind-g1po.onrender.com/api' 
   : 'http://localhost:3000/api';// Request config with cache busting
 const requestConfig = {

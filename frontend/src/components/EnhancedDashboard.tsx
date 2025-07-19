@@ -13,7 +13,7 @@ import { Budget, BudgetSummary } from '../services/budgetService';
 import axios from 'axios';
 
 // Environment-aware API URL
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
+const API_BASE_URL = (import.meta.env.PROD || window.location.hostname.includes('render.com'))
   ? 'https://moneymind-g1po.onrender.com/api' 
   : 'http://localhost:3000/api';
 

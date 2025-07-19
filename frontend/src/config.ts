@@ -1,17 +1,12 @@
 /**
-// API configuration
-export const API_CONFIG = {
-  // Use backend service URL for production, localhost for development
-  BASE_URL: process.env.NODE_ENV === 'production' 
-    ? 'https://moneymind-g1po.onrender.com/api' 
-    : 'http://localhost:3000/api',lication configuration
+ * Application configuration
  */
 
 // API configuration
 export const API_CONFIG = {
   // Use backend service URL for production, localhost for development
-  BASE_URL: process.env.NODE_ENV === 'production' 
-    ? 'https://moneymind-backend.onrender.com/api' 
+  BASE_URL: (import.meta.env.PROD || window.location.hostname.includes('render.com'))
+    ? 'https://moneymind-g1po.onrender.com/api' 
     : 'http://localhost:3000/api',
   // Request configuration
   REQUEST_CONFIG: {

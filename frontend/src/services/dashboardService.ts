@@ -1,7 +1,7 @@
 import api from '../utils/api';
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NODE_ENV === 'production'
+const API_BASE_URL = (import.meta.env.PROD || window.location.hostname.includes('render.com'))
   ? 'https://moneymind-g1po.onrender.com/api' 
   : 'http://localhost:3000/api';export interface DashboardData {
   transactions: any[];
