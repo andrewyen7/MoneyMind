@@ -1,10 +1,7 @@
 import api from '../utils/api';
 import axios from 'axios';
 
-const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('onrender.com');
-const API_BASE_URL = isProduction
-  ? 'https://moneymind-g1po.onrender.com/api' 
-  : 'http://localhost:3000/api';export interface DashboardData {
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';export interface DashboardData {
   transactions: any[];
   stats: {
     income: { total: number; count: number; avgAmount: number };

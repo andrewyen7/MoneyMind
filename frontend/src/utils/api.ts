@@ -2,12 +2,8 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import { ErrorHandler } from './errorHandler';
 
 // Create axios instance with default config
-const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('onrender.com');
-
 const api = axios.create({
-  baseURL: isProduction
-    ? 'https://moneymind-g1po.onrender.com/api' 
-    : 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
   withCredentials: true, // Important for session cookies
   timeout: 10000, // 10 second timeout
   headers: {

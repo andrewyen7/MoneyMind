@@ -1,9 +1,8 @@
 import api from '../utils/api';
 
 // Debug: Log the API base URL
-const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('onrender.com');
-const currentUrl = isProduction ? 'https://moneymind-g1po.onrender.com/api' : 'http://localhost:3000/api';
-console.log('🔧 AuthService - Environment:', isProduction ? 'PRODUCTION' : 'DEVELOPMENT');
+const currentUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+console.log('🔧 AuthService - Environment:', currentUrl);
 console.log('🌐 AuthService - API URL:', currentUrl);
 console.log('🏠 AuthService - Current hostname:', typeof window !== 'undefined' ? window.location.hostname : 'SSR');
 
