@@ -6,7 +6,6 @@ import BudgetForm from './BudgetForm';
 import BudgetCard from './BudgetCard';
 import { Budget, BudgetFormData, BudgetSummary } from '../services/budgetService';
 import { formatCurrency } from '../utils/formatters';
-import axios from 'axios';
 
 const BudgetsPage: React.FC = () => {
   const { state } = useAuth();
@@ -67,8 +66,7 @@ const BudgetsPage: React.FC = () => {
         }
       });
       
-      const result = await response.json();
-      console.log('Budget created successfully:', result);
+      console.log('Budget created successfully:', response.data);
       
       setShowForm(false);
       await loadData();
