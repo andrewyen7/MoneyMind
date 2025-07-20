@@ -108,6 +108,25 @@ budgetSchema.virtual('status').get(function() {
   return 'good';
 });
 
+// Virtual for budget period title
+budgetSchema.virtual('periodTitle').get(function() {
+  if (!this.startDate || !this.period) return '';
+  
+  const startDate = new Date(this.startDate);
+  const year = startDate.getFullYear();
+  
+  if (this.period === 'yearly') {
+    return `Year ${year}`;
+  } else {
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    const month = monthNames[startDate.getMonth()];
+    return `${year} ${month}`;
+  }
+});
+
 // Static method to get user's budgets with spending data
 budgetSchema.statics.getBudgetsWithSpending = async function(userId, options = {}) {
   const {
@@ -225,7 +244,48 @@ budgetSchema.statics.getBudgetsWithSpending = async function(userId, options = {
     },
     {
       $addFields: {
-        category: '$categoryInfo' // Make categoryInfo available as category
+        category: '$categoryInfo', // Make categoryInfo available as category
+        periodTitle: {
+          $cond: {
+            if: { $eq: ['$period', 'yearly'] },
+            then: {
+              $concat: ['Year ', { $toString: { $year: '$startDate' } }]
+            },
+            else: {
+              $let: {
+                vars: {
+                  month: { $month: '$startDate' },
+                  year: { $year: '$startDate' }
+                },
+                in: {
+                  $concat: [
+                    { $toString: '$$year' },
+                    ' ',
+                    {
+                      $switch: {
+                        branches: [
+                          { case: { $eq: ['$$month', 1] }, then: 'January' },
+                          { case: { $eq: ['$$month', 2] }, then: 'February' },
+                          { case: { $eq: ['$$month', 3] }, then: 'March' },
+                          { case: { $eq: ['$$month', 4] }, then: 'April' },
+                          { case: { $eq: ['$$month', 5] }, then: 'May' },
+                          { case: { $eq: ['$$month', 6] }, then: 'June' },
+                          { case: { $eq: ['$$month', 7] }, then: 'July' },
+                          { case: { $eq: ['$$month', 8] }, then: 'August' },
+                          { case: { $eq: ['$$month', 9] }, then: 'September' },
+                          { case: { $eq: ['$$month', 10] }, then: 'October' },
+                          { case: { $eq: ['$$month', 11] }, then: 'November' },
+                          { case: { $eq: ['$$month', 12] }, then: 'December' }
+                        ],
+                        default: 'Unknown'
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
       }
     },
     {
@@ -332,17 +392,10 @@ budgetSchema.methods.checkOverlap = async function() {
   }
 };
 
-// Pre-validate middleware to set end date and check overlaps
-budgetSchema.pre('validate', async function(next) {
+// Pre-save middleware to set end date and round amount
+budgetSchema.pre('save', function(next) {
   try {
-    console.log('Pre-validate budget:', {
-      id: this._id,
-      period: this.period,
-      startDate: this.startDate,
-      category: this.category?.toString()
-    });
-
-    // Set end date
+    // Set end date if not provided
     if (!this.endDate && this.startDate && this.period) {
       const start = new Date(this.startDate);
       
@@ -352,69 +405,21 @@ budgetSchema.pre('validate', async function(next) {
         this.endDate = new Date(start.getFullYear(), 11, 31);
       }
       
-      console.log('Set end date:', {
+      console.log('Set end date in pre-save:', {
         startDate: this.startDate,
         endDate: this.endDate,
         period: this.period
       });
     }
 
-    // Check overlap
-    if (this.isNew || this.isModified('startDate') || this.isModified('period') || this.isModified('category')) {
-      const Budget = this.constructor;
-      
-      const query = {
-        userId: this.userId,
-        category: this.category,
-        isActive: true,
-        period: this.period // Only check for same period type
-      };
-
-      if (this._id) {
-        query._id = { $ne: this._id };
-      }
-
-      // For same period type, check date overlap
-      if (this.period === 'yearly') {
-        const year = new Date(this.startDate).getFullYear();
-        query.$and = [
-          { startDate: { $lte: new Date(year, 11, 31) } },
-          { endDate: { $gte: new Date(year, 0, 1) } }
-        ];
-      } else {
-        query.$and = [
-          { startDate: { $lte: this.endDate } },
-          { endDate: { $gte: this.startDate } }
-        ];
-      }
-
-      const existingBudget = await Budget.findOne(query);
-      
-      console.log('Overlap check result:', {
-        query,
-        hasOverlap: !!existingBudget,
-        existingBudgetId: existingBudget?._id
-      });
-
-      if (existingBudget) {
-        throw new Error(`A ${this.period} budget for this category already exists in the specified time period`);
-      }
-    }
-
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Pre-save middleware to round amount
-budgetSchema.pre('save', function(next) {
-  try {
+    // Round amount
     if (this.isModified('amount')) {
       this.amount = Math.round(this.amount * 100) / 100;
     }
+    
     next();
   } catch (error) {
+    console.error('Pre-save error:', error);
     next(error);
   }
 });

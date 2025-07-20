@@ -25,6 +25,7 @@ export interface Budget {
   isNearLimit?: boolean;
   status?: 'good' | 'warning' | 'over';
   transactionCount?: number;
+  periodTitle?: string; // Human-readable period title like "2025 July" or "Year 2025"
 }
 
 export interface BudgetFormData {

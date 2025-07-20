@@ -45,6 +45,9 @@ const BudgetCard: React.FC<BudgetCardProps> = ({ budget, onEdit, onDelete }) => 
           <div>
             <h3 className="text-lg font-semibold text-gray-900">{budget.name}</h3>
             <p className="text-sm text-gray-500">{categoryData?.name || 'Unknown Category'}</p>
+            {budget.periodTitle && (
+              <p className="text-xs text-blue-600 font-medium">{budget.periodTitle}</p>
+            )}
           </div>
         </div>
         
@@ -126,7 +129,9 @@ const BudgetCard: React.FC<BudgetCardProps> = ({ budget, onEdit, onDelete }) => 
       {/* Additional Info */}
       <div className="flex justify-between items-center text-sm text-gray-500">
         <div className="flex items-center space-x-4">
-          <span className="capitalize">{getPeriodDisplayText(budget.period)}</span>
+          <span className="font-medium text-gray-700">
+            {budget.periodTitle || getPeriodDisplayText(budget.period)}
+          </span>
           {budget.transactionCount !== undefined && (
             <span>{budget.transactionCount} transactions</span>
           )}

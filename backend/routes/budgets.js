@@ -199,7 +199,27 @@ router.post('/', ensureAuthenticated, async (req, res) => {
       ? new Date(budgetYear, 11, 31, 23, 59, 59)
       : new Date(budgetYear, budgetMonth + 1, 0, 23, 59, 59);
 
-    // Create new budget (overlap checking is handled in the model's pre-validate middleware)
+    // Create new budget (with manual overlap checking for better control)
+    
+    // Check for existing budgets of the same period type only
+    const existingBudget = await Budget.findOne({
+      userId: req.user._id,
+      category,
+      period,
+      isActive: true,
+      $and: [
+        { startDate: { $lte: budgetEndDate } },
+        { endDate: { $gte: budgetStartDate } }
+      ]
+    });
+
+    if (existingBudget) {
+      return res.status(400).json({
+        success: false,
+        message: `A ${period} budget for this category already exists in the specified time period`
+      });
+    }
+
     const newBudget = new Budget({
       userId: req.user._id,
       name: name.trim(),
