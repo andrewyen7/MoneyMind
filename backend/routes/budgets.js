@@ -191,8 +191,8 @@ router.post('/', ensureAuthenticated, async (req, res) => {
     }
 
     // Set budget date
-    const budgetYear = budgetStartDate.getFullYear();
-    const budgetMonth = budgetStartDate.getMonth();
+    const budgetYear = parsedStartDate.getFullYear();
+    const budgetMonth = parsedStartDate.getMonth();
     
     // Set end date
     const budgetEndDate = period === 'yearly'
@@ -209,7 +209,7 @@ router.post('/', ensureAuthenticated, async (req, res) => {
       isActive: true,
       $and: [
         { startDate: { $lte: budgetEndDate } },
-        { endDate: { $gte: budgetStartDate } }
+        { endDate: { $gte: parsedStartDate } }
       ]
     });
 
@@ -226,7 +226,7 @@ router.post('/', ensureAuthenticated, async (req, res) => {
       category,
       amount: parseFloat(amount),
       period,
-      startDate: budgetStartDate,
+      startDate: parsedStartDate,
       endDate: budgetEndDate,
       alertThreshold: alertThreshold || 80,
       notes: notes ? notes.trim() : undefined,
