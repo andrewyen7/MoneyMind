@@ -31,7 +31,11 @@ const BudgetProgressChart: React.FC<BudgetProgressChartProps> = ({
   title = "Budget Progress" 
 }) => {
   const chartData = {
-    labels: budgets.map(budget => budget.category.name),
+    labels: budgets.map(budget => {
+      const categoryName = budget.category.name;
+      const periodTitle = budget.periodTitle || (budget.period === 'yearly' ? 'Yearly' : 'Monthly');
+      return `${categoryName}\n(${periodTitle})`;
+    }),
     datasets: [
       {
         label: 'Budgeted',
@@ -67,6 +71,11 @@ const BudgetProgressChart: React.FC<BudgetProgressChartProps> = ({
       },
     ],
   };
+
+  // Calculate a reasonable max value for the chart
+  const maxBudget = Math.max(...budgets.map(b => b.amount));
+  const maxSpent = Math.max(...budgets.map(b => b.spent || 0));
+  const chartMaxValue = Math.ceil(Math.max(maxBudget, maxSpent) * 1.2);
 
   const options: ChartOptions<'bar'> = {
     responsive: true,
@@ -121,13 +130,15 @@ const BudgetProgressChart: React.FC<BudgetProgressChartProps> = ({
         },
         ticks: {
           font: {
-            size: 11,
+            size: 10,
           },
-          maxRotation: 45,
+          maxRotation: 0,
+          minRotation: 0,
         },
       },
       y: {
         beginAtZero: true,
+        max: chartMaxValue,
         grid: {
           color: 'rgba(0, 0, 0, 0.1)',
         },
@@ -136,7 +147,12 @@ const BudgetProgressChart: React.FC<BudgetProgressChartProps> = ({
             size: 11,
           },
           callback: function(value) {
-            return '$' + value;
+            const numValue = typeof value === 'number' ? value : 0;
+            // Format large numbers more readably
+            if (numValue >= 1000) {
+              return '$' + (numValue / 1000).toFixed(1) + 'k';
+            }
+            return '$' + numValue;
           },
         },
       },
