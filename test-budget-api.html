@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Budget API</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .response { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e9; color: #2e7d32; }
+    </style>
+</head>
+<body>
+    <h1>Budget API Test</h1>
+    
+    <button onclick="testBudgets()">Test Budgets API</button>
+    <button onclick="testSummary()">Test Summary API</button>
+    <button onclick="testBoth()">Test Both APIs</button>
+    
+    <div id="output"></div>
+
+    <script>
+        const API_URL = 'https://moneymind-gipo.onrender.com/api';
+
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const div = document.createElement('div');
+            div.className = `response ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong><br>${message}`;
+            output.appendChild(div);
+        }
+
+        async function testBudgets() {
+            log('Testing Budgets API...', 'info');
+            try {
+                const response = await fetch(`${API_URL}/budgets?period=monthly`, {
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                log(`Budgets Response Status: ${response.status}`, response.ok ? 'success' : 'error');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`Budgets Count: ${data.budgets?.length || 0}`, 'success');
+                    log(`Budgets Data Structure: <pre>${JSON.stringify(data, null, 2)}</pre>`, 'success');
+                } else {
+                    const errorText = await response.text();
+                    log(`Budgets Error: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                log(`Budgets Fetch Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSummary() {
+            log('Testing Summary API...', 'info');
+            try {
+                const response = await fetch(`${API_URL}/budgets/summary?period=monthly`, {
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                log(`Summary Response Status: ${response.status}`, response.ok ? 'success' : 'error');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`Summary Data: <pre>${JSON.stringify(data, null, 2)}</pre>`, 'success');
+                } else {
+                    const errorText = await response.text();
+                    log(`Summary Error: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                log(`Summary Fetch Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testBoth() {
+            await testBudgets();
+            await testSummary();
+        }
+
+        // Auto-run tests on page load
+        window.onload = function() {
+            log('Page loaded. Testing APIs automatically...', 'success');
+            testBoth();
+        };
+    </script>
+</body>
+</html>

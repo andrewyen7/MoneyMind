@@ -6,6 +6,7 @@ export interface Budget {
   _id: string;
   userId: string;
   category: Category;
+  categoryInfo?: Category; // Alternative field name from API
   name: string;
   amount: number;
   period: 'monthly' | 'yearly';
@@ -57,9 +58,19 @@ class BudgetService {
   async getBudgets(filters: BudgetFilters = {}): Promise<Budget[]> {
     try {
       const apiUrl = import.meta.env.VITE_API_URL;
-      const response = await api.get(`${apiUrl}/budgets`, { params: filters });
-      return response.data.budgets;
+      const response = await axios({
+        method: 'get',
+        url: `${apiUrl}/budgets`,
+        params: filters,
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log('Budget service - getBudgets response:', response.data);
+      return response.data.budgets || response.data;
     } catch (error: any) {
+      console.error('Budget service - getBudgets error:', error);
       throw new Error(error.response?.data?.message || 'Failed to fetch budgets');
     }
   }
@@ -68,9 +79,19 @@ class BudgetService {
   async getBudgetSummary(period: 'monthly' | 'yearly' = 'monthly'): Promise<BudgetSummary> {
     try {
       const apiUrl = import.meta.env.VITE_API_URL;
-      const response = await api.get(`${apiUrl}/budgets/summary`, { params: { period } });
-      return response.data.summary;
+      const response = await axios({
+        method: 'get',
+        url: `${apiUrl}/budgets/summary`,
+        params: { period },
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log('Budget service - getBudgetSummary response:', response.data);
+      return response.data.summary || response.data;
     } catch (error: any) {
+      console.error('Budget service - getBudgetSummary error:', error);
       throw new Error(error.response?.data?.message || 'Failed to fetch budget summary');
     }
   }
@@ -111,9 +132,19 @@ class BudgetService {
   async updateBudget(id: string, budgetData: Partial<BudgetFormData>): Promise<Budget> {
     try {
       const apiUrl = import.meta.env.VITE_API_URL;
-      const response = await api.put(`${apiUrl}/budgets/${id}`, budgetData);
-      return response.data.budget;
+      const response = await axios({
+        method: 'put',
+        url: `${apiUrl}/budgets/${id}`,
+        data: budgetData,
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log('Budget update response:', response.data);
+      return response.data.budget || response.data;
     } catch (error: any) {
+      console.error('Budget update error:', error);
       throw new Error(error.response?.data?.message || 'Failed to update budget');
     }
   }
@@ -122,8 +153,17 @@ class BudgetService {
   async deleteBudget(id: string): Promise<void> {
     try {
       const apiUrl = import.meta.env.VITE_API_URL;
-      await api.delete(`${apiUrl}/budgets/${id}`);
+      await axios({
+        method: 'delete',
+        url: `${apiUrl}/budgets/${id}`,
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log('Budget deleted successfully');
     } catch (error: any) {
+      console.error('Budget deletion error:', error);
       throw new Error(error.response?.data?.message || 'Failed to delete budget');
     }
   }

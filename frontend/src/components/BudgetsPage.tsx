@@ -4,7 +4,7 @@ import Navigation from './shared/Navigation';
 import Header from './shared/Header';
 import BudgetForm from './BudgetForm';
 import BudgetCard from './BudgetCard';
-import { Budget, BudgetFormData, BudgetSummary } from '../services/budgetService';
+import budgetService, { Budget, BudgetFormData, BudgetSummary } from '../services/budgetService';
 import { formatCurrency } from '../utils/formatters';
 
 const BudgetsPage: React.FC = () => {
@@ -24,51 +24,24 @@ const BudgetsPage: React.FC = () => {
       setIsLoading(true);
       setError(null);
       
-      const apiUrl = import.meta.env.VITE_API_URL;
-      console.log('Loading data from API URL:', apiUrl);
+      console.log('Loading budget data for period:', periodFilter);
       
-      // Fetch budgets
-      const budgetsRes = await fetch(`${apiUrl}/budgets?period=${periodFilter}`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      // Fetch budgets and summary using budgetService
+      const [budgetsData, summaryData] = await Promise.all([
+        budgetService.getBudgets({ period: periodFilter }),
+        budgetService.getBudgetSummary(periodFilter)
+      ]);
       
-      console.log('Budgets response status:', budgetsRes.status);
-      console.log('Budgets response headers:', [...budgetsRes.headers.entries()]);
+      console.log('Raw budgets data received:', budgetsData);
+      console.log('Raw summary data received:', summaryData);
+      console.log('Type of budgetsData:', typeof budgetsData, Array.isArray(budgetsData));
+      console.log('Type of summaryData:', typeof summaryData);
       
-      if (!budgetsRes.ok) {
-        const errorText = await budgetsRes.text();
-        console.error('Budgets API error response:', errorText);
-        throw new Error(`HTTP ${budgetsRes.status}: ${errorText}`);
-      }
+      setBudgets(budgetsData || []);
+      setSummary(summaryData || null);
       
-      const budgetsData = await budgetsRes.json();
-      
-      // Fetch summary
-      const summaryRes = await fetch(`${apiUrl}/budgets/summary?period=${periodFilter}`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      console.log('Summary response status:', summaryRes.status);
-      
-      if (!summaryRes.ok) {
-        const errorText = await summaryRes.text();
-        console.error('Summary API error response:', errorText);
-        throw new Error(`HTTP ${summaryRes.status}: ${errorText}`);
-      }
-      
-      const summaryData = await summaryRes.json();
-      
-      console.log('Budgets loaded:', budgetsData);
-      console.log('Summary loaded:', summaryData);
-      
-      setBudgets(budgetsData.budgets || []);
-      setSummary(summaryData.summary || null);
+      console.log('Budgets state set to:', budgetsData);
+      console.log('Summary state set to:', summaryData);
     } catch (error: any) {
       console.error('Error loading budget data:', error);
       setError(error.message || 'Failed to load budget data');
@@ -86,17 +59,8 @@ const BudgetsPage: React.FC = () => {
       setIsSubmitting(true);
       console.log('Creating budget with data:', data);
       
-      const apiUrl = import.meta.env.VITE_API_URL;
-      const response = await fetch(`${apiUrl}/budgets`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data),
-        credentials: 'include'
-      });
-      const result = await response.json();
-      console.log('Budget created successfully:', result);
+      await budgetService.createBudget(data);
+      console.log('Budget created successfully');
       setShowForm(false);
       await loadData();
     } catch (error: any) {
@@ -114,17 +78,8 @@ const BudgetsPage: React.FC = () => {
       setIsSubmitting(true);
       console.log('Updating budget with data:', data);
       
-      const apiUrl = import.meta.env.VITE_API_URL;
-      const response = await fetch(`${apiUrl}/budgets/${editingBudget._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data),
-        credentials: 'include'
-      });
-      const result = await response.json();
-      console.log('Budget updated successfully:', result);
+      await budgetService.updateBudget(editingBudget._id, data);
+      console.log('Budget updated successfully');
       setEditingBudget(null);
       setShowForm(false);
       await loadData();
@@ -149,13 +104,8 @@ const BudgetsPage: React.FC = () => {
     try {
       console.log('Deleting budget with ID:', id);
       
-      const apiUrl = import.meta.env.VITE_API_URL;
-      const response = await fetch(`${apiUrl}/budgets/${id}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-      const result = await response.json();
-      console.log('Budget deleted successfully:', result);
+      await budgetService.deleteBudget(id);
+      console.log('Budget deleted successfully');
       await loadData();
     } catch (error: any) {
       console.error('Budget deletion failed:', error);
@@ -218,7 +168,7 @@ const BudgetsPage: React.FC = () => {
           </div>
 
           {/* Summary Cards */}
-          {summary && (
+          {summary ? (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
               <div className="bg-white overflow-hidden shadow rounded-lg">
                 <div className="p-5">
@@ -307,6 +257,10 @@ const BudgetsPage: React.FC = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          ) : (
+            <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded mb-6">
+              <span className="block sm:inline">Summary data not available. Raw summary: {JSON.stringify(summary)}</span>
             </div>
           )}
 

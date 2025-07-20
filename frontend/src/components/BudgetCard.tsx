@@ -14,6 +14,9 @@ const BudgetCard: React.FC<BudgetCardProps> = ({ budget, onEdit, onDelete }) => 
   const percentageUsed = budget.percentageUsed || 0;
   const status = budget.status || 'good';
   
+  // Handle both category and categoryInfo structures
+  const categoryData = budget.category || budget.categoryInfo;
+  
   const statusColor = getStatusColor(status);
   const statusText = getStatusText(status);
   const daysRemaining = getDaysRemaining(budget.endDate);
@@ -35,13 +38,13 @@ const BudgetCard: React.FC<BudgetCardProps> = ({ budget, onEdit, onDelete }) => 
         <div className="flex items-center space-x-3">
           <div
             className="w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold"
-            style={{ backgroundColor: budget.category.color }}
+            style={{ backgroundColor: categoryData?.color || '#6B7280' }}
           >
-            <span className="text-lg">{budget.category.icon}</span>
+            <span className="text-lg">{categoryData?.icon || '💰'}</span>
           </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-900">{budget.name}</h3>
-            <p className="text-sm text-gray-500">{budget.category.name}</p>
+            <p className="text-sm text-gray-500">{categoryData?.name || 'Unknown Category'}</p>
           </div>
         </div>
         

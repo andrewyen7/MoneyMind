@@ -224,6 +224,11 @@ budgetSchema.statics.getBudgetsWithSpending = async function(userId, options = {
       }
     },
     {
+      $addFields: {
+        category: '$categoryInfo' // Make categoryInfo available as category
+      }
+    },
+    {
       $project: {
         spendingData: 0
       }
