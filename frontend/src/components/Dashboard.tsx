@@ -28,8 +28,9 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     setLoading(true);
     
-    // Use API_CONFIG for environment-aware URL
-    axios.get(`${API_CONFIG.BASE_URL.replace('/api', '')}/api/dashboard/data`, {
+    // Use VITE_API_URL for environment-aware URL
+    const apiUrl = import.meta.env.VITE_API_URL;
+    axios.get(`${apiUrl}/dashboard/data`, {
       withCredentials: true,
       headers: {
         'Content-Type': 'application/json',

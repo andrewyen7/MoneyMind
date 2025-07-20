@@ -1,11 +1,5 @@
 import api from '../utils/api';
 
-// Debug: Log the API base URL
-const currentUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-console.log('🔧 AuthService - Environment:', currentUrl);
-console.log('🌐 AuthService - API URL:', currentUrl);
-console.log('🏠 AuthService - Current hostname:', typeof window !== 'undefined' ? window.location.hostname : 'SSR');
-
 export interface User {
   _id: string;
   username: string;

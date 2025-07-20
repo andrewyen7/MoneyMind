@@ -3,7 +3,7 @@ import { ErrorHandler } from './errorHandler';
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true, // Important for session cookies
   timeout: 10000, // 10 second timeout
   headers: {
