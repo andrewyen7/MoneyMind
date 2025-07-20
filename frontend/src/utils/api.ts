@@ -11,41 +11,9 @@ const api = axios.create({
   },
 });
 
-// Fix for budgets1 typo
-const originalGet = api.get;
-api.get = function<T = any, R = AxiosResponse<T>, D = any>(
-  url: string,
-  config?: any
-): Promise<R> {
-  if (url && url.includes('budgets1')) {
-    url = url.replace('budgets1', 'budgets');
-  }
-  return originalGet.call(this, url, config) as Promise<R>;
-};
-
-const originalPost = api.post;
-api.post = function<T = any, R = AxiosResponse<T>, D = any>(
-  url: string,
-  data?: D,
-  config?: any
-): Promise<R> {
-  if (url && url.includes('budgets1')) {
-    url = url.replace('budgets1', 'budgets');
-  }
-  return originalPost.call(this, url, data, config) as Promise<R>;
-};
-
-// Override specific endpoints that have issues
-const budgetsEndpoint = '/budgets'; // NOT '/budgets1'
-
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Fix the budgets1 typo by replacing it with budgets
-    if (config.url && config.url.includes('budgets1')) {
-      config.url = config.url.replace('budgets1', 'budgets');
-    }
-    
     // Remove cache-control headers that cause CORS issues
     if (config.headers) {
       delete config.headers['Cache-Control'];
