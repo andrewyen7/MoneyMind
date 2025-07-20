@@ -207,6 +207,11 @@ class TransactionService {
   async createTransaction(transactionData: TransactionFormData): Promise<Transaction> {
     try {
       const response = await api.post('/transactions', transactionData);
+      
+      // Invalidate all transaction-related caches after creation
+      invalidateRelatedCaches.onTransactionChange();
+      console.log('Transaction created and cache invalidated');
+      
       return response.data.transaction;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Failed to create transaction');
@@ -217,6 +222,11 @@ class TransactionService {
   async updateTransaction(id: string, transactionData: Partial<TransactionFormData>): Promise<Transaction> {
     try {
       const response = await api.put(`/transactions/${id}`, transactionData);
+      
+      // Invalidate all transaction-related caches after update
+      invalidateRelatedCaches.onTransactionChange();
+      console.log('Transaction updated and cache invalidated');
+      
       return response.data.transaction;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Failed to update transaction');
@@ -227,6 +237,10 @@ class TransactionService {
   async deleteTransaction(id: string): Promise<void> {
     try {
       await api.delete(`/transactions/${id}`);
+      
+      // Invalidate all transaction-related caches after deletion
+      invalidateRelatedCaches.onTransactionChange();
+      console.log('Transaction deleted and cache invalidated');
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Failed to delete transaction');
     }

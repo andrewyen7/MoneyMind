@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Currency Precision</title>
+</head>
+<body>
+    <h1>Currency Precision Test</h1>
+    <div id="test-results"></div>
+
+    <script>
+        // Test currency formatting function
+        function formatCurrency(amount) {
+            const roundedAmount = Math.round(amount * 100) / 100;
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(roundedAmount);
+        }
+
+        // Test cases
+        const testCases = [
+            { input: 600, expected: '$600.00' },
+            { input: 599.98, expected: '$599.98' },
+            { input: 600.004, expected: '$600.00' },
+            { input: 599.996, expected: '$600.00' },
+            { input: 3.48, expected: '$3.48' },
+            { input: 4.04, expected: '$4.04' },
+            { input: 200.00, expected: '$200.00' }
+        ];
+
+        let results = '<h2>Test Results:</h2>';
+        let allPassed = true;
+
+        testCases.forEach((test, index) => {
+            const result = formatCurrency(test.input);
+            const passed = result === test.expected;
+            if (!passed) allPassed = false;
+            
+            results += `<p>Test ${index + 1}: ${test.input} → ${result} ${passed ? '✅' : '❌'}</p>`;
+        });
+
+        results += `<h3>Overall Result: ${allPassed ? '✅ All tests passed!' : '❌ Some tests failed'}</h3>`;
+        document.getElementById('test-results').innerHTML = results;
+    </script>
+</body>
+</html>

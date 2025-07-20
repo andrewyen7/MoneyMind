@@ -122,9 +122,18 @@ const TransactionsPage: React.FC = () => {
     }
 
     try {
+      console.log('Deleting transaction with ID:', id);
+      
+      // Delete the transaction (cache will be automatically invalidated)
       await transactionService.deleteTransaction(id);
-      await loadData(); // Reload data
+      console.log('Transaction deleted successfully, reloading data...');
+      
+      // Reload data to refresh the UI
+      await loadData(filters);
+      console.log('Data reloaded successfully after deletion');
+      
     } catch (error: any) {
+      console.error('Error deleting transaction:', error);
       setError(error.message);
     }
   };
