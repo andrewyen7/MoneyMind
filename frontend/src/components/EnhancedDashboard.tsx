@@ -100,6 +100,41 @@ const EnhancedDashboard: React.FC = () => {
     // eslint-disable-next-line
   }, [location.pathname]);
 
+  // Add visibility change listener to refresh data when tab becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('Tab became visible, refreshing dashboard data...');
+        loadDashboardData();
+      }
+    };
+
+    const handleFocus = () => {
+      console.log('Window gained focus, refreshing dashboard data...');
+      loadDashboardData();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
+
+  // Add periodic refresh every 30 seconds when page is active
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!document.hidden) {
+        console.log('Periodic refresh of dashboard data...');
+        loadDashboardData();
+      }
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   // Prepare data for spending pie chart
   const getSpendingByCategory = () => {
     const categorySpending: { [key: string]: { amount: number; color: string; icon: string; name: string } } = {};

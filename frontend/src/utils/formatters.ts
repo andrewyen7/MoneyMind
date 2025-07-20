@@ -4,10 +4,14 @@
 
 // Format currency
 export const formatCurrency = (amount: number): string => {
+  // Ensure proper rounding to avoid floating point precision issues
+  const roundedAmount = Math.round(amount * 100) / 100;
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD'
-  }).format(amount);
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(roundedAmount);
 };
 
 // Get status color

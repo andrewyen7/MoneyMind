@@ -227,7 +227,7 @@ router.post('/', ensureAuthenticated, async (req, res) => {
     const newTransaction = new Transaction({
       userId: req.user._id,
       type,
-      amount: parseFloat(amount),
+      amount: Math.round(parseFloat(amount) * 100) / 100, // Ensure proper currency precision
       description: description.trim(),
       category,
       date: transactionDate,
@@ -323,7 +323,7 @@ router.put('/:id', ensureAuthenticated, async (req, res) => {
 
     // Update fields
     if (type) transaction.type = type;
-    if (amount !== undefined) transaction.amount = parseFloat(amount);
+    if (amount !== undefined) transaction.amount = Math.round(parseFloat(amount) * 100) / 100;
     if (description) transaction.description = description.trim();
     if (category) transaction.category = category;
     

@@ -53,6 +53,29 @@ const TransactionsPage: React.FC = () => {
     loadData();
   }, []);
 
+  // Add visibility change listener to refresh data when tab becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('Tab became visible, refreshing transactions...');
+        loadData();
+      }
+    };
+
+    const handleFocus = () => {
+      console.log('Window gained focus, refreshing transactions...');
+      loadData();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [filters]); // Include filters as dependency
+
   // Handle filter changes
   const handleFiltersChange = (newFilters: TFilters) => {
     setFilters(newFilters);
@@ -112,10 +135,14 @@ const TransactionsPage: React.FC = () => {
   };
 
   const formatAmount = (amount: number) => {
+    // Ensure proper rounding to avoid floating point precision issues
+    const roundedAmount = Math.round(amount * 100) / 100;
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(roundedAmount);
   };
 
   return (
