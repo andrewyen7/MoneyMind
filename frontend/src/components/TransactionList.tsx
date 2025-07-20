@@ -22,8 +22,8 @@ const TransactionList: React.FC<TransactionListProps> = ({
   };
 
   const formatDate = (dateString: string) => {
-    // 直接從字符串解析日期部分，避免時區轉換問題
-    const dateStr = dateString.split('T')[0]; // 獲取 YYYY-MM-DD 部分
+    // Parse date directly from string to avoid timezone conversion issues
+    const dateStr = dateString.split('T')[0]; // Get YYYY-MM-DD part
     const [year, month, day] = dateStr.split('-');
     
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',

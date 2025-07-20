@@ -38,7 +38,7 @@ router.delete('/clear-category/:categoryId', ensureAuthenticated, async (req, re
   try {
     const { categoryId } = req.params;
     
-    // 查找並刪除該類別的所有預算
+    // Find and delete all budgets for this category
     const result = await Budget.updateMany(
       {
         userId: req.user._id,
@@ -119,8 +119,8 @@ router.get('/:id', ensureAuthenticated, async (req, res) => {
   }
 });
 
-// 清理所有預算的輔助函數
-const deactivateAllBudgets = async (userId, category) => {
+// Helper function to clear all budgets
+const clearAllBudgets = async (userId) => {
   try {
     const result = await Budget.updateMany(
       { userId, category, isActive: true },
@@ -150,24 +150,24 @@ router.post('/', ensureAuthenticated, async (req, res) => {
       notes
     } = req.body;
 
-    // 基本驗證
+    // Basic validation
     if (!name || !category || !amount || !period || !startDate) {
       return res.status(400).json({
         success: false,
-        message: '名稱、類別、金額、週期和開始日期都是必填的'
+        message: 'Name, category, amount, period, and start date are all required'
       });
     }
 
-    // 檢查並解析日期
-    const budgetStartDate = new Date(startDate);
-    if (isNaN(budgetStartDate.getTime())) {
+        // Check and parse date
+    const parsedStartDate = new Date(startDate);
+    if (isNaN(parsedStartDate)) {
       return res.status(400).json({
         success: false,
-        message: '無效的開始日期格式'
+        message: 'Invalid start date format'
       });
     }
 
-    // 驗證類別
+    // Validate category
     console.log('Category validation - Received category:', category);
     console.log('Category validation - User ID:', req.user._id);
     
@@ -186,53 +186,20 @@ router.post('/', ensureAuthenticated, async (req, res) => {
     if (!categoryDoc) {
       return res.status(400).json({
         success: false,
-        message: '無效的支出類別'
+        message: 'Invalid expense category'
       });
     }
 
-    // 設置預算日期
+    // Set budget date
     const budgetYear = budgetStartDate.getFullYear();
     const budgetMonth = budgetStartDate.getMonth();
     
-    // 設置結束日期
+    // Set end date
     const budgetEndDate = period === 'yearly'
       ? new Date(budgetYear, 11, 31, 23, 59, 59)
       : new Date(budgetYear, budgetMonth + 1, 0, 23, 59, 59);
 
-
-    // 先檢查是否有重疊的啟用預算，需要考慮時間區間和週期
-    const overlapQuery = {
-      userId: req.user._id,
-      category,
-      isActive: true,
-      $or: [
-        // 完全相同週期的重疊
-        {
-          period: period,
-          startDate: { $lte: budgetEndDate },
-          endDate: { $gte: budgetStartDate }
-        },
-        // 月預算與年預算的重疊
-        {
-          period: period === 'yearly' ? 'monthly' : 'yearly',
-          startDate: { $lte: budgetEndDate },
-          endDate: { $gte: budgetStartDate }
-        }
-      ]
-    };
-    console.log('Overlap query:', overlapQuery);
-    const overlapping = await Budget.findOne(overlapQuery);
-    console.log('Overlapping result:', overlapping);
-
-    if (overlapping) {
-      // 如果找到重疊的預算，返回錯誤
-      return res.status(400).json({
-        success: false,
-        message: `該類別在指定的時間區間已存在${overlapping.period === 'yearly' ? '年度' : '每月'}預算`
-      });
-    }
-
-    // 創建新預算
+    // Create new budget (overlap checking is handled in the model's pre-validate middleware)
     const newBudget = new Budget({
       userId: req.user._id,
       name: name.trim(),
@@ -246,23 +213,23 @@ router.post('/', ensureAuthenticated, async (req, res) => {
       isActive: true
     });
 
-    // 保存並填充類別資訊
+    // Save and populate category information
     await newBudget.save();
     await newBudget.populate('category', 'name icon color type');
 
     res.status(201).json({
       success: true,
-      message: '預算創建成功',
+      message: 'Budget created successfully',
       budget: newBudget
     });
   } catch (error) {
-    console.error('創建預算時發生錯誤:', error);
+    console.error('Error occurred while creating budget:', error);
     
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map(err => err.message);
       return res.status(400).json({
         success: false,
-        message: '驗證失敗',
+        message: 'Validation failed',
         errors
       });
     }
@@ -270,13 +237,13 @@ router.post('/', ensureAuthenticated, async (req, res) => {
     if (error.name === 'CastError') {
       return res.status(400).json({
         success: false,
-        message: '提供的數據格式無效'
+        message: 'Invalid data format provided'
       });
     }
     
     res.status(500).json({
       success: false,
-      message: '創建預算時發生伺服器錯誤',
+      message: 'Server error occurred while creating budget',
       error: error.message
     });
   }

@@ -64,7 +64,7 @@ const TransactionsPage: React.FC = () => {
       setIsSubmitting(true);
       await transactionService.createTransaction(data);
       setShowForm(false);
-      // 立即重新載入數據以顯示新交易
+      // Immediately reload data to show the new transaction
       await loadData();
     } catch (error: any) {
       throw error; // Let the form handle the error
@@ -242,10 +242,10 @@ const TransactionsPage: React.FC = () => {
                   description: editingTransaction.description,
                   category: editingTransaction.category._id,
                   date: (() => {
-                    // 確保日期格式為 YYYY-MM-DD
+                    // Ensure date format is YYYY-MM-DD
                     const dateStr = editingTransaction.date;
                     
-                    // 如果是 MM/DD/YYYY 格式（如 01/07/2025）
+                    // If it's MM/DD/YYYY format (like 01/07/2025)
                     if (dateStr.includes('/')) {
                       const parts = dateStr.split('/');
                       if (parts.length === 3) {
@@ -254,17 +254,17 @@ const TransactionsPage: React.FC = () => {
                       }
                     }
                     
-                    // 如果是 ISO 格式（包含 T）
+                    // If it's ISO format (contains T)
                     if (dateStr.includes('T')) {
                       return dateStr.split('T')[0];
                     }
                     
-                    // 如果已經是 YYYY-MM-DD 格式
+                    // If it's already YYYY-MM-DD format
                     if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
                       return dateStr;
                     }
                     
-                    // 嘗試解析日期並格式化
+                    // Try to parse date and format it
                     try {
                       const date = new Date(dateStr);
                       const year = date.getFullYear();

@@ -295,15 +295,17 @@ budgetSchema.methods.checkOverlap = async function() {
     const query = {
       userId: this.userId,
       category: this.category,
-      period: this.period,
+      period: this.period, // Only check within the same period type
       isActive: true
     };
 
+    // For same period type, check date overlap
     if (this.period === 'yearly') {
-      query.startDate = {
-        $gte: new Date(this.startDate.getFullYear(), 0, 1),
-        $lte: new Date(this.startDate.getFullYear(), 11, 31)
-      };
+      const year = new Date(this.startDate).getFullYear();
+      query.$and = [
+        { startDate: { $lte: new Date(year, 11, 31) } },
+        { endDate: { $gte: new Date(year, 0, 1) } }
+      ];
     } else {
       query.$and = [
         { startDate: { $lte: this.endDate } },
@@ -340,7 +342,7 @@ budgetSchema.pre('validate', async function(next) {
       category: this.category?.toString()
     });
 
-    // 設置結束日期
+    // Set end date
     if (!this.endDate && this.startDate && this.period) {
       const start = new Date(this.startDate);
       
@@ -357,7 +359,7 @@ budgetSchema.pre('validate', async function(next) {
       });
     }
 
-    // 檢查重疊
+    // Check overlap
     if (this.isNew || this.isModified('startDate') || this.isModified('period') || this.isModified('category')) {
       const Budget = this.constructor;
       
@@ -365,19 +367,20 @@ budgetSchema.pre('validate', async function(next) {
         userId: this.userId,
         category: this.category,
         isActive: true,
-        period: this.period
+        period: this.period // Only check for same period type
       };
 
       if (this._id) {
         query._id = { $ne: this._id };
       }
 
+      // For same period type, check date overlap
       if (this.period === 'yearly') {
         const year = new Date(this.startDate).getFullYear();
-        query.startDate = {
-          $gte: new Date(year, 0, 1),
-          $lte: new Date(year, 11, 31)
-        };
+        query.$and = [
+          { startDate: { $lte: new Date(year, 11, 31) } },
+          { endDate: { $gte: new Date(year, 0, 1) } }
+        ];
       } else {
         query.$and = [
           { startDate: { $lte: this.endDate } },
@@ -394,7 +397,7 @@ budgetSchema.pre('validate', async function(next) {
       });
 
       if (existingBudget) {
-        throw new Error('A budget for this category already exists in the specified time period');
+        throw new Error(`A ${this.period} budget for this category already exists in the specified time period`);
       }
     }
 
